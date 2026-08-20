@@ -566,7 +566,7 @@ let customBrokers = JSON.parse(localStorage.getItem('port_brokers_v43')) || DEFA
 let transactions = JSON.parse(localStorage.getItem('port_v43_txs')) || [];
 let livePrices = JSON.parse(localStorage.getItem('port_v43_prices')) || {};
 let change24hMap = JSON.parse(localStorage.getItem('port_v43_24h')) || {};
-let cclRate = 1250;
+let cclRate = 1250; // dólar MEP (nombre de variable heredado, ver fetchCCL)
 let btcPriceUSD = 65000;
 let displayCurrency = 'USD';
 let currentCategory = 'CRYPTO';
@@ -978,11 +978,11 @@ function updateFormLabels() {
 
 async function fetchCCL() {
   try {
-    const res = await fetch('https://dolarapi.com/v1/dolares/contadoconliqui');
+    const res = await fetch('https://dolarapi.com/v1/dolares/bolsa');
     const data = await res.json();
     if (data.compra) {
       cclRate = (data.compra + data.venta) / 2;
-      document.getElementById('cclRate').innerText = `CCL $${cclRate.toLocaleString('es-AR', {maximumFractionDigits:0})}`;
+      document.getElementById('mepRate').innerText = `MEP $${cclRate.toLocaleString('es-AR', {maximumFractionDigits:0})}`;
     }
   } catch(e) {}
 }

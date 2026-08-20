@@ -88,7 +88,7 @@ body {
 }
 .pill.pos { background: var(--green-glow); color: var(--green); border: 1px solid rgba(48, 209, 88, 0.3); }
 .pill.neg { background: var(--red-glow); color: var(--red); border: 1px solid rgba(255, 69, 58, 0.3); }
-.pill.ccl { background: var(--accent-glow); color: var(--accent); border: 1px solid var(--accent); }
+.pill.mep { background: var(--accent-glow); color: var(--accent); border: 1px solid var(--accent); }
 .pill.cost { background: rgba(255, 255, 255, 0.05); color: var(--text-dim); border: 1px solid var(--border); }
 
 .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
