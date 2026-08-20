@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="obsidian">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+  <title>Portfolio Terminal Pro</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Portfolio">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+
+  <!-- Fuentes & Librerías -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+  <!-- Barra de Encabezado Principal -->
+  <div class="header-bar" onclick="setCategoryFilter('ALL')" title="Ver todo el portafolio">
+    <div class="header-left">
+      <div class="sub">Patrimonio Total Consolidado</div>
+      <div class="val" id="totalValue">$0.00</div>
+      <div class="header-pills">
+        <span id="badgeUnrealized" class="pill pos">+$0.00 (0.00%)</span>
+        <span class="pill cost" id="badgeTotalCost">Invertido: $0.00 USD</span>
+        <span class="pill ccl" id="cclRate">CCL $1.250</span>
+      </div>
+    </div>
+    
+    <div class="header-actions" onclick="event.stopPropagation()">
+      <div class="curr-switch">
+        <button class="curr-btn active" id="btnUSD" onclick="setDisplayCurrency('USD')">USD</button>
+        <button class="curr-btn" id="btnARS" onclick="setDisplayCurrency('ARS')">ARS</button>
+        <button class="curr-btn" id="btnBTC" onclick="setDisplayCurrency('BTC')">BTC</button>
+      </div>
+      <button class="btn-action" onclick="openBuyModal()">+ Inversión</button>
+      <button class="btn-icon-setting" onclick="openSettingsModal()" title="Ajustes y Respaldo">⚙</button>
+    </div>
+  </div>
+
+  <!-- 4 KPI Cards Superiores con Watermark & Glow -->
+  <div class="kpi-row">
+    <div class="kpi-box cat-cedear" id="kpiBoxCedear" onclick="setCategoryFilter('CEDEAR')">
+      <div class="kpi-watermark">CED</div>
+      <div class="kpi-top-row">
+        <div class="kpi-badge-group">
+          <div class="kpi-icon-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><ellipse cx="12" cy="12" rx="4" ry="9"></ellipse><line x1="3" y1="12" x2="21" y2="12"></line></svg>
+          </div>
+          <div class="kpi-title">CEDEARs</div>
+        </div>
+        <span class="kpi-pnl-tag neu" id="tagCedear">0.0%</span>
+      </div>
+      <div class="kpi-val" id="statCedears">$0.00</div>
+      <div class="kpi-bottom-row">
+        <span class="pill cost" id="costCedear">Inv: $0</span>
+        <span class="kpi-subtag">Acciones USA</span>
+      </div>
+    </div>
+
+    <div class="kpi-box cat-crypto" id="kpiBoxCrypto" onclick="setCategoryFilter('CRYPTO')">
+      <div class="kpi-watermark">CRY</div>
+      <div class="kpi-top-row">
+        <div class="kpi-badge-group">
+          <div class="kpi-icon-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7" ry="3"></ellipse><path d="M5 6v5c0 1.66 3.13 3 7 3s7-1.34 7-3V6"></path><path d="M5 11v5c0 1.66 3.13 3 7 3s7-1.34 7-3v-5"></path></svg>
+          </div>
+          <div class="kpi-title">Cripto</div>
+        </div>
+        <span class="kpi-pnl-tag neu" id="tagCrypto">0.0%</span>
+      </div>
+      <div class="kpi-val" id="statCrypto">$0.00</div>
+      <div class="kpi-bottom-row">
+        <span class="pill cost" id="costCrypto">Inv: $0</span>
+        <span class="kpi-subtag">Spot & Stables</span>
+      </div>
+    </div>
+
+    <div class="kpi-box cat-accion" id="kpiBoxAccion" onclick="setCategoryFilter('ACCION')">
+      <div class="kpi-watermark">ARG</div>
+      <div class="kpi-top-row">
+        <div class="kpi-badge-group">
+          <div class="kpi-icon-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 6"></polyline><polyline points="21 11 21 6 16 6"></polyline></svg>
+          </div>
+          <div class="kpi-title">Acciones</div>
+        </div>
+        <span class="kpi-pnl-tag neu" id="tagAccion">0.0%</span>
+      </div>
+      <div class="kpi-val" id="statAcciones">$0.00</div>
+      <div class="kpi-bottom-row">
+        <span class="pill cost" id="costAccion">Inv: $0</span>
+        <span class="kpi-subtag">Merval / Bonos</span>
+      </div>
+    </div>
+
+    <div class="kpi-box cat-yield" id="kpiBoxYield" onclick="setCategoryFilter('YIELD')">
+      <div class="kpi-watermark">FCI</div>
+      <div class="kpi-top-row">
+        <div class="kpi-badge-group">
+          <div class="kpi-icon-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 8 2 8"></polygon><line x1="4" y1="8" x2="4" y2="19"></line><line x1="9" y1="8" x2="9" y2="19"></line><line x1="15" y1="8" x2="15" y2="19"></line><line x1="20" y1="8" x2="20" y2="19"></line><line x1="2" y1="22" x2="22" y2="22"></line><line x1="2" y1="19" x2="22" y2="19"></line></svg>
+          </div>
+          <div class="kpi-title">Liquidez</div>
+        </div>
+        <span class="kpi-pnl-tag neu" id="tagYield">0.0%</span>
+      </div>
+      <div class="kpi-val" id="statYield">$0.00</div>
+      <div class="kpi-bottom-row">
+        <span class="pill cost" id="costYield">Inv: $0</span>
+        <span class="kpi-subtag">Fondos & FCI</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel Principal -->
+  <div class="main-panel">
+    <div class="panel-head">
+      <div class="switch-tabs">
+        <button class="st-btn active" id="btnTabHoldings" onclick="setMainTab('holdings')">Tenencias Activas</button>
+        <button class="st-btn" id="btnTabDividends" onclick="setMainTab('dividends')">💰 Dividendos & Rentas</button>
+        <button class="st-btn" id="btnTabMetrics" onclick="setMainTab('metrics')">📊 Métricas & Gráficos</button>
+        <button class="st-btn" id="btnTabHistory" onclick="setMainTab('history')">Libro Contable</button>
+      </div>
+      
+      <div style="display:flex; align-items:center; gap:8px;">
+        <select id="holdingsSortBy" onchange="render()" style="width:auto;">
+          <option value="VAL_DESC">Mayor Valuación</option>
+          <option value="PNL_DESC">Mayor Ganancia</option>
+          <option value="ROI_DESC">Mayor Rendimiento (%)</option>
+          <option value="ROI_ASC">Menor Rendimiento (%)</option>
+          <option value="ALPHA">Alfabético (A-Z)</option>
+        </select>
+        <button class="pill" style="background:var(--card-bg); border:1px solid var(--border); color:var(--muted); cursor:pointer;" onclick="updateLivePrices()">↻ Precios</button>
+      </div>
+    </div>
+
+    <!-- Vistas de Contenido -->
+    <div id="holdingsView" class="holdings-list"></div>
+
+    <div id="dividendsView" style="display:none; flex-direction:column; gap:12px;">
+      <div id="monthlyCalendarContainer" class="calendar-grid"></div>
+      <div id="dividendsTableContainer" style="margin-top:10px;"></div>
+    </div>
+
+    <div id="metricsView" style="display:none; flex-direction:column; gap:14px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <select id="metricsAssetFilter" onchange="renderMetricsAdvanced()" style="width:260px;">
+          <option value="ALL">Portafolio Global Consolidado</option>
+        </select>
+        <div class="curr-switch">
+          <button class="curr-btn" onclick="setTimeframe(7)">1S</button>
+          <button class="curr-btn" onclick="setTimeframe(30)">1M</button>
+          <button class="curr-btn" onclick="setTimeframe(90)">3M</button>
+          <button class="curr-btn" onclick="setTimeframe(365)">1A</button>
+          <button class="curr-btn active" onclick="setTimeframe(0)">TODO</button>
+        </div>
+      </div>
+
+      <div class="analytics-grid">
+        <div class="a-card"><div class="a-label">Retorno Ponderado (ROI)</div><div class="a-val" id="metricROI">0.00%</div></div>
+        <div class="a-card"><div class="a-label">Ganancia Realizada</div><div class="a-val" id="metricRealized">$0.00</div></div>
+        <div class="a-card"><div class="a-label">Inyecciones Netas</div><div class="a-val" id="metricInjections">$0.00</div></div>
+        <div class="a-card"><div class="a-label">Máximo Invertido</div><div class="a-val" id="metricPeakCapital">$0.00</div></div>
+      </div>
+
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:16px;">
+        <div class="chart-container-card">
+          <div class="chart-title">🍕 Composición de Cartera</div>
+          <div class="chart-box">
+            <canvas id="chartPie"></canvas>
+            <div class="pie-center-label">
+              <div class="pie-center-val" id="pieCenterVal">$0</div>
+              <div class="pie-center-sub">Total</div>
+            </div>
+          </div>
+        </div>
+        <div class="chart-container-card">
+          <div class="chart-title">📈 Evolución del Capital Invertido</div>
+          <div class="chart-box"><canvas id="chartGrowth"></canvas></div>
+        </div>
+      </div>
+
+      <div class="chart-container-card">
+        <div class="chart-title">📊 Curva de Inyección de Capital vs. Valuación Real</div>
+        <div class="chart-box" style="height:200px;"><canvas id="chartInjectionVsVal"></canvas></div>
+      </div>
+
+      <div class="chart-container-card">
+        <div class="chart-title">🏆 Ranking de Rendimiento Relativo (% ROI)</div>
+        <div class="chart-box" style="height:170px;"><canvas id="chartRoiRanking"></canvas></div>
+      </div>
+    </div>
+
+    <div id="historyView" style="display:none; flex-direction:column; gap:8px;"></div>
+  </div>
+</div>
+
+<!-- Modal 1: Carga Manual -->
+<div class="modal-overlay" id="modalBuy" onclick="closeModal('modalBuy', event)">
+  <div class="app-modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title">Cargar Inversión</div>
+      <button class="btn-del-mini" onclick="closeModal('modalBuy')">✕</button>
+    </div>
+    <div class="tabs">
+      <button class="tab active" id="tabCrypto" onclick="setCategory('CRYPTO')">Cripto</button>
+      <button class="tab" id="tabCedear" onclick="setCategory('CEDEAR')">CEDEAR</button>
+      <button class="tab" id="tabAccion" onclick="setCategory('ACCION')">Acción / Bono</button>
+      <button class="tab" id="tabYield" onclick="setCategory('YIELD')">Fondos / Liquidez</button>
+    </div>
+    <div class="form-grid">
+      <div class="input-field">
+        <input type="text" id="symbol" placeholder="Buscar Ticker / Nombre (BTC, MELI, AL30)..." autocomplete="off" oninput="handleSearch()">
+        <div id="dropdown" class="dropdown"></div>
+      </div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+        <select id="brokerSelect"></select>
+        <select id="currency" onchange="updateFormLabels()">
+          <option value="USD">Moneda: USD ($)</option>
+          <option value="ARS">Moneda: ARS (Pesos)</option>
+        </select>
+      </div>
+      <input type="date" id="tradeDate">
+      <div id="boxStandard">
+        <div style="margin-bottom:8px;"><input type="number" id="inputAmount" placeholder="¿Cuánto compraste?" step="any"></div>
+        <div id="priceFieldWrapper"><input type="number" id="inputPrice" placeholder="¿A qué precio cotizaba?" step="any"></div>
+      </div>
+      <div id="boxYield" style="display:none;">
+        <input type="number" id="inputYieldCapital" placeholder="Capital Invertido" step="any">
+      </div>
+      <button class="btn-submit" onclick="saveAsset()">Registrar en Portafolio</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 2: Ajustes -->
+<div class="modal-overlay" id="modalSettings" onclick="closeModal('modalSettings', event)">
+  <div class="app-modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title">⚙ Configuración & Respaldos</div>
+      <button class="btn-del-mini" onclick="closeModal('modalSettings')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div style="font-size:0.75rem; font-weight:800; color:var(--muted); text-transform:uppercase;">Tema de Color</div>
+      <select id="themeSelector" onchange="changeTheme(this.value)">
+        <option value="obsidian">🎨 Obsidian (Cyberpunk Neón)</option>
+        <option value="emerald">🌲 Midnight Emerald (Fintech)</option>
+        <option value="sunset">🌅 Sunset Velvet (Violeta & Oro)</option>
+        <option value="slate">🏢 Clean Slate (Gris Ejecutivo)</option>
+      </select>
+
+      <div style="font-size:0.75rem; font-weight:800; color:var(--muted); text-transform:uppercase; margin-top:6px;">Mis Billeteras / Brokers</div>
+      <div style="display:flex; gap:6px;">
+        <input type="text" id="newBrokerNameInput" placeholder="Nueva cuenta..." style="flex:1;">
+        <button class="btn-submit" style="width:auto; padding:8px 14px; background:var(--accent); color:#000;" onclick="addNewCustomBroker()">+ Agregar</button>
+      </div>
+      <div id="customBrokersList" style="display:flex; flex-direction:column; gap:6px; max-height:100px; overflow-y:auto;"></div>
+
+      <div style="font-size:0.75rem; font-weight:800; color:var(--muted); text-transform:uppercase; margin-top:6px;">Agregar Activos Faltantes (CEDEARs)</div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px;">
+        <input type="text" id="newCustomTicker" placeholder="Ticker" style="text-transform:uppercase;">
+        <input type="text" id="newCustomName" placeholder="Nombre">
+        <div style="display:flex; gap:6px;">
+          <input type="number" id="newCustomRatio" placeholder="Ratio">
+          <button class="btn-submit" style="width:auto; padding:8px 14px; background:var(--accent); color:#000;" onclick="addCustomCedear()">+</button>
+        </div>
+      </div>
+
+      <div style="font-size:0.75rem; font-weight:800; color:var(--muted); text-transform:uppercase; margin-top:6px;">Importar / Exportar</div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+        <button class="pill" style="justify-content:center; background:linear-gradient(135deg,#10b981,#059669); color:#fff; border:none; padding:10px; cursor:pointer;" onclick="exportCSV()">📊 Exportar CSV</button>
+        <button class="pill" style="justify-content:center; background:var(--card-bg); border:1px solid var(--border); color:#fff; padding:10px; cursor:pointer;" onclick="exportData()">💾 Respaldo JSON</button>
+      </div>
+      <button class="pill" style="justify-content:center; background:var(--card-bg); border:1px solid var(--border); color:var(--muted); padding:10px; cursor:pointer;" onclick="document.getElementById('fileIn').click()">📥 Importar JSON</button>
+      <input type="file" id="fileIn" style="display:none" onchange="importData(event)">
+
+      <button class="btn-danger" style="margin-top:6px;" onclick="clearAllData()">🗑 Vaciar Portafolio a Cero</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 3: Operar / Vender -->
+<div class="modal-overlay" id="modalManage" onclick="closeModal('modalManage', event)">
+  <div class="app-modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="manageTitle">Operar Activo</div>
+        <div style="font-size:0.72rem; color:var(--muted)" id="manageSubtitle"></div>
+      </div>
+      <button class="btn-del-mini" onclick="closeModal('modalManage')">✕</button>
+    </div>
+    <div id="manageCedearSection" style="display:none; background:rgba(56,189,248,0.06); border:1px solid rgba(56,189,248,0.2); border-radius:12px; padding:10px; margin-bottom:4px;">
+      <div style="font-size:0.75rem; font-weight:800; color:var(--accent); margin-bottom:4px;">⚙ Ajustar Ratio</div>
+      <div style="display:flex; gap:6px; align-items:center;">
+        <span style="font-size:0.8rem; font-weight:700; color:var(--muted);">1 :</span>
+        <input type="number" id="customRatioInput" placeholder="20" step="any" style="flex:1;">
+        <button class="btn-submit" style="width:auto; padding:8px 12px; background:var(--accent); color:#000;" onclick="applyCustomRatio()">Guardar</button>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+        <select id="sellCurrency" onchange="updateManageLabels()">
+          <option value="USD">Moneda: USD ($)</option>
+          <option value="ARS">Moneda: ARS (Pesos)</option>
+        </select>
+        <input type="date" id="sellDate">
+      </div>
+      <div class="input-field">
+        <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+          <label style="font-size:0.72rem; color:var(--muted)" id="sellInput1Label">Cantidad a Vender</label>
+          <button type="button" onclick="setSellAll()" style="background:none; border:none; color:var(--accent); font-size:0.72rem; font-weight:700; cursor:pointer;">100%</button>
+        </div>
+        <input type="number" id="sellInput1" step="any">
+      </div>
+      <div class="input-field" id="sellInput2Field">
+        <label style="font-size:0.72rem; color:var(--muted); display:block; margin-bottom:2px;" id="sellInput2Label">Precio de Venta</label>
+        <input type="number" id="sellInput2" step="any">
+      </div>
+      <button class="btn-submit" style="background:var(--green); color:#000;" onclick="executeSale()">Confirmar Venta</button>
+      <button class="btn-danger" onclick="deleteEntireGroup()">Eliminar Posición Completa</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal 4: Saldo Liquidez -->
+<div class="modal-overlay" id="modalEditYield" onclick="closeModal('modalEditYield', event)">
+  <div class="app-modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="editYieldTitle">✏ Actualizar Saldo Actual</div>
+        <div style="font-size:0.72rem; color:var(--muted)" id="editYieldSubtitle"></div>
+      </div>
+      <button class="btn-del-mini" onclick="closeModal('modalEditYield')">✕</button>
+    </div>
+    <div class="form-grid">
+      <div style="font-size:0.78rem; color:var(--muted);">Ingresá el saldo total real de la cuenta.</div>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+        <select id="editYieldCurrency">
+          <option value="ARS">Moneda: ARS (Pesos)</option>
+          <option value="USD">Moneda: USD ($)</option>
+        </select>
+        <input type="number" id="editYieldNewAmount" placeholder="ej: 68000" step="any">
+      </div>
+      <button class="btn-submit" style="background:var(--purple); color:#fff;" onclick="saveEditedYieldBalance()">Guardar Saldo</button>
+      <button class="btn-danger" onclick="deleteEntireGroup()">Eliminar Fondo / Posición</button>
+    </div>
+  </div>
+</div>
+
+<!-- Lógica Principal -->
+<script src="app.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js').catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>

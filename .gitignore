@@ -1,0 +1,11 @@
+# Datos personales de portafolio (no versionar: el repo va a ser público para GitHub Pages)
+mi_portafolio_bullmarket.json
+*_backup_*.json
+portafolio_backup_*.json
+
+# Config local de Claude Code
+.claude/settings.local.json
+
+# Sistema
+.DS_Store
+Thumbs.db
