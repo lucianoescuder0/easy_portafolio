@@ -43,6 +43,7 @@
         <button class="curr-btn" id="btnBTC" onclick="setDisplayCurrency('BTC')">BTC</button>
       </div>
       <button class="btn-action" onclick="openBuyModal()">+ Inversión</button>
+      <button class="btn-icon-setting" onclick="openModal('modalHelp')" title="Ayuda: cómo funciona la app">❓</button>
       <button class="btn-icon-setting" onclick="openSettingsModal()" title="Ajustes y Respaldo">⚙</button>
     </div>
   </div>
@@ -380,6 +381,54 @@
       <button class="btn-del-mini" onclick="closeModal('modalBrokers')">✕</button>
     </div>
     <div class="form-grid" id="brokersBody"></div>
+  </div>
+</div>
+
+<!-- Modal 7: Ayuda -->
+<div class="modal-overlay" id="modalHelp" onclick="closeModal('modalHelp', event)">
+  <div class="app-modal" style="max-width:540px;" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title">❓ Cómo funciona</div>
+      <button class="btn-del-mini" onclick="closeModal('modalHelp')">✕</button>
+    </div>
+    <div class="help-body">
+      <div class="help-section">
+        <div class="help-q">¿Qué es el "Patrimonio Total Consolidado"?</div>
+        <div class="help-a">La suma de todo lo que tenés — CEDEARs, Cripto, Acciones y Liquidez — convertida a la moneda que elijas arriba (USD / ARS / BTC).</div>
+      </div>
+      <div class="help-section">
+        <div class="help-q">¿Cómo cargo una compra?</div>
+        <div class="help-a">Tocá <b>"+ Inversión"</b>, elegí la categoría (Cripto, CEDEAR, Acción/Bono o Fondos), buscá el ticker y completá cantidad y precio.</div>
+      </div>
+      <div class="help-section">
+        <div class="help-q">¿Qué significa el "1:20" en un CEDEAR?</div>
+        <div class="help-a">Es la paridad: cuántos CEDEARs equivalen a 1 acción real del exterior. Tocá ese badge (el ⓘ) para ver el detalle completo — cuántas acciones reales tenés, precio del CEDEAR y precio implícito por acción.</div>
+      </div>
+      <div class="help-section">
+        <div class="help-q">¿Por qué a veces aparece "N brokers" en vez del nombre?</div>
+        <div class="help-a">Cuando comprás el mismo activo en más de una cuenta, la app lo agrupa en una sola fila. Tocá ese badge para ver cuánto tenés en cada broker.</div>
+      </div>
+      <div class="help-section">
+        <div class="help-q">¿Cómo vendo o corrijo una posición?</div>
+        <div class="help-a">Tocá el botón <b>⇄</b> de la fila. Ahí podés vender parcial o total, ajustar el ratio de un CEDEAR si está mal, o eliminar la posición completa.</div>
+      </div>
+      <div class="help-section">
+        <div class="help-q">¿Cómo actualizo un Fondo / Liquidez?</div>
+        <div class="help-a">Esas posiciones no tienen precio de mercado automático. Tocá el botón <b>✏</b> de la fila y cargá el saldo real y actual de la cuenta.</div>
+      </div>
+      <div class="help-section">
+        <div class="help-q">¿Qué dólar usa la app para convertir ARS ↔ USD?</div>
+        <div class="help-a">El dólar MEP, que se actualiza solo al abrir la app (pill "MEP $..." arriba). Afecta CEDEARs, acciones locales y liquidez en pesos.</div>
+      </div>
+      <div class="help-section">
+        <div class="help-q">¿Los precios se actualizan solos?</div>
+        <div class="help-a">Sí, al abrir la app y también tocando <b>"↻ Precios"</b>. Cripto viene de Binance en vivo; CEDEARs y acciones locales, de ByMA en vivo.</div>
+      </div>
+      <div class="help-section">
+        <div class="help-q">¿Dónde quedan guardados mis datos?</div>
+        <div class="help-a">Todo en el <b>localStorage</b> de este navegador/dispositivo — nada se manda a ningún servidor. Para pasar los datos a otro dispositivo o tener un respaldo, usá ⚙ Configuración → Respaldo JSON / Importar JSON.</div>
+      </div>
+    </div>
   </div>
 </div>
 
