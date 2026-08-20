@@ -167,10 +167,26 @@
       </div>
 
       <div class="analytics-grid">
-        <div class="a-card"><div class="a-label">Retorno Ponderado (ROI)</div><div class="a-val" id="metricROI">0.00%</div></div>
-        <div class="a-card"><div class="a-label">Ganancia Realizada</div><div class="a-val" id="metricRealized">$0.00</div></div>
-        <div class="a-card"><div class="a-label">Inyecciones Netas</div><div class="a-val" id="metricInjections">$0.00</div></div>
-        <div class="a-card"><div class="a-label">Máximo Invertido</div><div class="a-val" id="metricPeakCapital">$0.00</div></div>
+        <div class="a-card m-roi">
+          <div class="a-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"></line><circle cx="6.5" cy="6.5" r="2.5"></circle><circle cx="17.5" cy="17.5" r="2.5"></circle></svg></div>
+          <div class="a-label">Retorno Ponderado (ROI)</div>
+          <div class="a-val" id="metricROI">0.00%</div>
+        </div>
+        <div class="a-card m-gain">
+          <div class="a-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><polyline points="8 12 11 15 16 9"></polyline></svg></div>
+          <div class="a-label">Ganancia Realizada</div>
+          <div class="a-val" id="metricRealized">$0.00</div>
+        </div>
+        <div class="a-card m-inj">
+          <div class="a-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="4" y1="20" x2="20" y2="20"></line></svg></div>
+          <div class="a-label">Inyecciones Netas</div>
+          <div class="a-val" id="metricInjections">$0.00</div>
+        </div>
+        <div class="a-card m-peak">
+          <div class="a-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="4" y2="12"></line><line x1="10" y1="20" x2="10" y2="6"></line><line x1="16" y1="20" x2="16" y2="14"></line><line x1="21" y1="20" x2="21" y2="9"></line></svg></div>
+          <div class="a-label">Máximo Invertido</div>
+          <div class="a-val" id="metricPeakCapital">$0.00</div>
+        </div>
       </div>
 
       <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:16px;">
@@ -336,6 +352,20 @@
       <button class="btn-submit" style="background:var(--purple); color:#fff;" onclick="saveEditedYieldBalance()">Guardar Saldo</button>
       <button class="btn-danger" onclick="deleteEntireGroup()">Eliminar Fondo / Posición</button>
     </div>
+  </div>
+</div>
+
+<!-- Modal 5: Detalle de Paridad (CEDEAR) -->
+<div class="modal-overlay" id="modalParity" onclick="closeModal('modalParity', event)">
+  <div class="app-modal" style="max-width:400px;" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="parityTitle">Detalle de Paridad</div>
+        <div style="font-size:0.72rem; color:var(--muted)" id="paritySubtitle"></div>
+      </div>
+      <button class="btn-del-mini" onclick="closeModal('modalParity')">✕</button>
+    </div>
+    <div class="form-grid" id="parityBody"></div>
   </div>
 </div>
 

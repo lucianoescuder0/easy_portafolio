@@ -487,6 +487,22 @@ function getAssetLogoUrl(h) {
   return `https://assets.parqet.com/logos/symbol/${ticker}?format=png`;
 }
 
+// Ícono para una fila (tenencia o movimiento del libro contable): logo real si hay,
+// si no un avatar circular sólido con las iniciales (fallback también si la imagen falla).
+function buildIconHTML(a) {
+  const fallbackFill = FALLBACK_FILL[a.type] || FALLBACK_FILL.CEDEAR;
+  const letters = a.symbol.slice(0, 2);
+  const logoUrl = getAssetLogoUrl(a);
+  if (logoUrl) {
+    return `
+      <div class="h-icon-container">
+        <img class="h-icon-img" src="${logoUrl}" alt="${a.symbol}" loading="lazy" onerror="this.style.display='none'; this.parentElement.classList.add('h-icon-fallback'); this.parentElement.style.background='${fallbackFill}'; this.parentElement.innerHTML='<span>${letters}</span>';">
+      </div>
+    `;
+  }
+  return `<div class="h-icon-container h-icon-fallback" style="background:${fallbackFill};"><span>${letters}</span></div>`;
+}
+
 const ACCIONES_LOCALES = {
   'AGRO': { name: 'Agrometal S.A.I.', yahooSymbol: 'AGRO.BA' },
   'AL30': { name: 'Bono Bonar 2030 USD', yahooSymbol: 'AL30.BA' },
@@ -795,6 +811,27 @@ function openManageModal(symbol) {
 
   updateManageLabels();
   openModal('modalManage');
+}
+
+function openParityModal(symbol) {
+  const holdings = getConsolidatedHoldings();
+  const h = holdings.find(x => x.symbol === symbol);
+  if (!h) return;
+
+  const pricePerCedear = h.units > 0 ? (h.currentVal / h.units) : 0;
+  const impliedSharePrice = h.realShares > 0 ? (h.currentVal / h.realShares) : 0;
+
+  document.getElementById('parityTitle').innerText = `${h.symbol} · Detalle de Paridad`;
+  document.getElementById('paritySubtitle').innerText = h.companyName;
+  document.getElementById('parityBody').innerHTML = `
+    <div class="parity-row"><span>Paridad</span><b>1 acción real = ${h.ratio} CEDEARs</b></div>
+    <div class="parity-row"><span>Tu tenencia</span><b>${h.units < 1 ? h.units.toFixed(6) : h.units.toFixed(2)} CEDEARs</b></div>
+    <div class="parity-row"><span>Equivale a</span><b>${h.realShares.toFixed(4)} acciones reales</b></div>
+    <div class="parity-row"><span>Precio del CEDEAR</span><b>${formatValue(pricePerCedear)}</b></div>
+    <div class="parity-row"><span>Precio implícito x acción real</span><b>${formatValue(impliedSharePrice)}</b></div>
+    <div class="parity-row"><span>Valor total de la posición</span><b>${formatValue(h.currentVal)}</b></div>
+  `;
+  openModal('modalParity');
 }
 
 function openEditYieldModal(symbol) {
@@ -1530,25 +1567,15 @@ function render() {
       subDesc = `Invertido: ${formatValue(h.totalCostUSD)} · ${h.broker}`;
     } else {
       const ratioTag = h.type === 'CEDEAR' ? `1:${h.ratio}` : '1:1';
-      badgeInfo = `<span class="badge-tag">${ratioTag}</span> <span class="badge-broker">${h.broker}</span>`;
+      const ratioBadge = h.type === 'CEDEAR'
+        ? `<span class="badge-tag badge-ratio" onclick="event.stopPropagation(); openParityModal('${h.symbol}')" title="Ver detalle de paridad">${ratioTag} ⓘ</span>`
+        : `<span class="badge-tag">${ratioTag}</span>`;
+      badgeInfo = `${ratioBadge} <span class="badge-broker">${h.broker}</span>`;
       const realAccInfo = h.type === 'CEDEAR' ? `· ${h.realShares.toFixed(2)} Acc. Reales` : '';
       subDesc = `${h.units < 1 ? h.units.toFixed(6) : h.units.toFixed(2)} un. @ ${formatValue(h.avgPrice)} PPP ${realAccInfo}`;
     }
 
-    const fallbackFill = FALLBACK_FILL[h.type] || FALLBACK_FILL.CEDEAR;
-    const letters = h.symbol.slice(0, 2);
-    const logoUrl = getAssetLogoUrl(h);
-    let iconHTML = '';
-
-    if (logoUrl) {
-      iconHTML = `
-        <div class="h-icon-container">
-          <img class="h-icon-img" src="${logoUrl}" alt="${h.symbol}" loading="lazy" onerror="this.style.display='none'; this.parentElement.classList.add('h-icon-fallback'); this.parentElement.style.background='${fallbackFill}'; this.parentElement.innerHTML='<span>${letters}</span>';">
-        </div>
-      `;
-    } else {
-      iconHTML = `<div class="h-icon-container h-icon-fallback" style="background:${fallbackFill};"><span>${letters}</span></div>`;
-    }
+    const iconHTML = buildIconHTML(h);
 
     const pct24 = change24hMap[h.symbol] !== undefined ? change24hMap[h.symbol] : 0;
     const diff24USD = (h.currentVal * pct24) / 100;
@@ -1640,31 +1667,42 @@ function renderHistory() {
   list.innerHTML = '';
 
   if (transactions.length === 0) {
-    list.innerHTML = '<div style="color:var(--muted); text-align:center; padding:30px 0; font-size:0.85rem;">No hay movimientos registrados.</div>';
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">📖</div>
+        <div class="empty-state-title">Sin movimientos</div>
+        <div class="empty-state-sub">Todavía no registraste ninguna compra, venta o alta.</div>
+      </div>
+    `;
     return;
   }
 
   const sorted = [...transactions].sort((a,b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
+  const companyNameOf = (t) => (CEDEAR_MAP[t.symbol]?.name) || (ACCIONES_LOCALES[t.symbol]?.name) || (t.type === 'YIELD' ? t.symbol.replace('_', ' ') : t.symbol);
 
   sorted.forEach(t => {
-    let sideText = t.side === 'SELL' ? 'VENTA / RESCATE' : 'COMPRA / ALTA';
+    const isSell = t.side === 'SELL';
+    const sideText = isSell ? 'Venta / Rescate' : 'Compra / Alta';
     const totalUSD = t.units * t.priceUSD;
-    const detailText = `${t.units < 1 ? t.units.toFixed(6) : t.units.toFixed(2)} un. @ ${formatValue(t.priceUSD)} PPP · ${t.broker || 'Broker'}`;
+    const detailText = `${t.units < 1 ? t.units.toFixed(6) : t.units.toFixed(2)} un. @ ${formatValue(t.priceUSD)} PPP`;
 
     const item = document.createElement('div');
-    item.className = 'h-item';
+    item.className = `h-item ledger-item cat-${t.type.toLowerCase()}`;
     item.innerHTML = `
-      <div style="display:flex; flex-direction:column; gap:2px;">
-        <div style="display:flex; align-items:center; gap:6px;">
-          <span class="badge-tag" style="background:${t.side === 'SELL' ? 'rgba(244,63,94,0.15)' : 'rgba(16,185,129,0.15)'}; color:${t.side === 'SELL' ? 'var(--red)' : 'var(--green)'}">${sideText}</span>
-          <b style="font-size:0.9rem;">${t.symbol}</b>
-          <span style="font-size:0.7rem; color:var(--muted)">(${t.type})</span>
+      <div class="h-left">
+        ${buildIconHTML(t)}
+        <div class="h-titles">
+          <div class="h-name-row">
+            <span class="h-ticker" style="font-size:1.05rem;">${t.symbol}</span>
+            <span class="badge-tag" style="background:${isSell ? 'var(--red-glow)' : 'var(--green-glow)'}; color:${isSell ? 'var(--red)' : 'var(--green)'}">${sideText}</span>
+          </div>
+          <div class="h-company">${companyNameOf(t)}</div>
+          <div class="h-sub">${t.date} · ${detailText} · ${t.broker || 'Broker'}</div>
         </div>
-        <div style="font-size:0.72rem; color:var(--muted)">Fecha: <b>${t.date}</b> · ${detailText}</div>
       </div>
 
-      <div style="display:flex; align-items:center; gap:10px;">
-        <div style="font-weight:800; font-size:0.95rem;">${formatValue(totalUSD)}</div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div class="h-val" style="font-size:1.05rem;">${formatValue(totalUSD)}</div>
         <button class="btn-del-mini" title="Eliminar registro" onclick="deleteSingleTx(${t.id})">✕</button>
       </div>
     `;

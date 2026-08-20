@@ -240,6 +240,11 @@ body {
 .h-item.cat-accion::before { background: #30d158; box-shadow: 0 0 10px rgba(48, 209, 88, 0.7); }
 .h-item.cat-yield::before  { background: #bf5af2; box-shadow: 0 0 10px rgba(191, 90, 242, 0.7); }
 
+/* Libro Contable: mismo look de fila que las tenencias, pero sin la columna central de 24h */
+.h-item.ledger-item { display: flex; justify-content: space-between; align-items: center; gap: 14px; }
+.h-item.ledger-item .h-left { flex: 1; min-width: 0; }
+.h-item.ledger-item .h-company { max-width: none; }
+
 .h-item-watermark {
   position: absolute;
   right: 28%;
@@ -284,6 +289,16 @@ body {
 
 .badge-tag { font-size: 0.65rem; padding: 2px 6px; border-radius: 6px; background: rgba(56,189,248,0.15); color: var(--accent); font-weight: 700; }
 .badge-broker { font-size: 0.65rem; padding: 2px 6px; border-radius: 6px; background: rgba(255,255,255,0.08); color: var(--text-dim); font-weight: 700; }
+.badge-ratio { cursor: pointer; transition: background .15s ease, color .15s ease; }
+.badge-ratio:hover { background: var(--accent); color: #000; }
+
+.parity-row {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: 11px 13px; background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); font-size: 0.82rem;
+}
+.parity-row span { color: var(--muted); font-weight: 600; }
+.parity-row b { font-family: var(--font-display); color: #fff; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
 
 /* Col 2: Centro (Variación 24H) */
 .h-center-24h {
@@ -363,8 +378,30 @@ body {
 
 .a-card {
   background: var(--card-bg); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 16px;
+  border-radius: var(--radius); padding: 16px; position: relative; overflow: hidden;
+  transition: transform 0.25s var(--ease), border-color 0.25s var(--ease);
 }
+.a-card:hover { transform: translateY(-2px); border-color: var(--border-glow); }
+.a-card::before {
+  content: ''; position: absolute; top: 0; left: 16px; right: 16px; height: 3px;
+  border-radius: 0 0 4px 4px; opacity: .75;
+}
+.a-card.m-roi::before  { background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+.a-card.m-gain::before { background: linear-gradient(90deg, transparent, var(--green), transparent); }
+.a-card.m-inj::before  { background: linear-gradient(90deg, transparent, var(--accent-2), transparent); }
+.a-card.m-peak::before { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+
+.a-icon {
+  width: 30px; height: 30px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;
+  box-shadow: 0 6px 14px -6px currentColor;
+}
+.a-icon svg { width: 16px; height: 16px; }
+.a-card.m-roi .a-icon  { color: var(--accent); }
+.a-card.m-gain .a-icon { color: var(--green); }
+.a-card.m-inj .a-icon  { color: var(--accent-2); }
+.a-card.m-peak .a-icon { color: var(--gold); }
+
 .a-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.6px; }
 .a-val { font-family: var(--font-display); font-size: 1.35rem; font-weight: 800; margin-top: 6px; color: #ffffff; }
 
