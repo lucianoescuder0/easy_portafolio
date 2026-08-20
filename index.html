@@ -369,6 +369,20 @@
   </div>
 </div>
 
+<!-- Modal 6: Desglose por Broker -->
+<div class="modal-overlay" id="modalBrokers" onclick="closeModal('modalBrokers', event)">
+  <div class="app-modal" style="max-width:400px;" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="brokersTitle">Desglose por Broker</div>
+        <div style="font-size:0.72rem; color:var(--muted)" id="brokersSubtitle"></div>
+      </div>
+      <button class="btn-del-mini" onclick="closeModal('modalBrokers')">✕</button>
+    </div>
+    <div class="form-grid" id="brokersBody"></div>
+  </div>
+</div>
+
 <!-- Lógica Principal -->
 <script src="app.js"></script>
 <script>

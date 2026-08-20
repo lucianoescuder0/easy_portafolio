@@ -289,8 +289,8 @@ body {
 
 .badge-tag { font-size: 0.65rem; padding: 2px 6px; border-radius: 6px; background: rgba(56,189,248,0.15); color: var(--accent); font-weight: 700; }
 .badge-broker { font-size: 0.65rem; padding: 2px 6px; border-radius: 6px; background: rgba(255,255,255,0.08); color: var(--text-dim); font-weight: 700; }
-.badge-ratio { cursor: pointer; transition: background .15s ease, color .15s ease; }
-.badge-ratio:hover { background: var(--accent); color: #000; }
+.badge-clickable { cursor: pointer; transition: background .15s ease, color .15s ease; }
+.badge-clickable:hover { background: var(--accent); color: #000; }
 
 .parity-row {
   display: flex; justify-content: space-between; align-items: center; gap: 12px;

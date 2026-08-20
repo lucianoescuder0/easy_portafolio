@@ -834,6 +834,22 @@ function openParityModal(symbol) {
   openModal('modalParity');
 }
 
+function openBrokerModal(symbol) {
+  const holdings = getConsolidatedHoldings();
+  const h = holdings.find(x => x.symbol === symbol);
+  if (!h) return;
+
+  document.getElementById('brokersTitle').innerText = `${h.symbol} · Por Broker`;
+  document.getElementById('brokersSubtitle').innerText = h.companyName;
+  document.getElementById('brokersBody').innerHTML = h.brokerBreakdown.map(b => {
+    const val = h.units > 0 ? (b.units / h.units) * h.currentVal : 0;
+    const pct = h.units > 0 ? (b.units / h.units) * 100 : 0;
+    const unitsText = b.units < 1 ? b.units.toFixed(6) : b.units.toFixed(2);
+    return `<div class="parity-row"><span>${b.broker}</span><b>${formatValue(val)} <span style="color:var(--muted); font-weight:600;">· ${unitsText} un. (${pct.toFixed(0)}%)</span></b></div>`;
+  }).join('');
+  openModal('modalBrokers');
+}
+
 function openEditYieldModal(symbol) {
   managingSymbol = symbol;
   const holdings = getConsolidatedHoldings();
@@ -1102,6 +1118,7 @@ function getConsolidatedHoldings() {
         units: 0,
         totalCostUSD: 0,
         ratio: t.ratio || 1,
+        brokerBuys: {},
         txs: []
       };
     }
@@ -1112,6 +1129,8 @@ function getConsolidatedHoldings() {
     if (!t.side || t.side === 'BUY') {
       h.units += t.units;
       h.totalCostUSD += (t.units * t.priceUSD);
+      const b = t.broker || 'Custodia Principal';
+      h.brokerBuys[b] = (h.brokerBuys[b] || 0) + t.units;
     } else if (t.side === 'SELL') {
       const avgCost = h.units > 0 ? (h.totalCostUSD / h.units) : 0;
       const soldUnits = Math.min(t.units, h.units);
@@ -1141,7 +1160,18 @@ function getConsolidatedHoldings() {
     else if (ACCIONES_LOCALES[h.symbol]) companyName = ACCIONES_LOCALES[h.symbol].name;
     else if (h.type === 'YIELD') companyName = h.symbol.replace('_', ' ');
 
-    return { ...h, companyName, avgPrice, currentPrice, currentVal, pnl, pnlPct, realShares };
+    // Reparto por broker a prorrata de lo comprado en cada uno (si hubo ventas parciales,
+    // no sabemos de qué broker salieron, así que se descuentan proporcionalmente entre todos).
+    const grossBought = Object.values(h.brokerBuys).reduce((a, b) => a + b, 0);
+    const brokerBreakdown = Object.entries(h.brokerBuys)
+      .map(([broker, boughtUnits]) => ({
+        broker,
+        units: grossBought > 0 ? h.units * (boughtUnits / grossBought) : 0
+      }))
+      .filter(b => b.units > 0.000001)
+      .sort((a, b) => b.units - a.units);
+
+    return { ...h, companyName, avgPrice, currentPrice, currentVal, pnl, pnlPct, realShares, brokerBreakdown };
   });
 
   if (activeCategoryFilter !== 'ALL') {
@@ -1562,15 +1592,19 @@ function render() {
     let badgeInfo = '';
     let subDesc = '';
 
+    const brokerBadge = h.brokerBreakdown.length > 1
+      ? `<span class="badge-broker badge-clickable" onclick="event.stopPropagation(); openBrokerModal('${h.symbol}')" title="Ver desglose por broker">${h.brokerBreakdown.length} brokers ⓘ</span>`
+      : `<span class="badge-broker">${h.broker}</span>`;
+
     if (h.type === 'YIELD') {
       badgeInfo = `<span class="badge-tag" style="background:rgba(191,90,242,0.15); color:var(--purple)">Fondo / Renta</span>`;
       subDesc = `Invertido: ${formatValue(h.totalCostUSD)} · ${h.broker}`;
     } else {
       const ratioTag = h.type === 'CEDEAR' ? `1:${h.ratio}` : '1:1';
       const ratioBadge = h.type === 'CEDEAR'
-        ? `<span class="badge-tag badge-ratio" onclick="event.stopPropagation(); openParityModal('${h.symbol}')" title="Ver detalle de paridad">${ratioTag} ⓘ</span>`
+        ? `<span class="badge-tag badge-clickable" onclick="event.stopPropagation(); openParityModal('${h.symbol}')" title="Ver detalle de paridad">${ratioTag} ⓘ</span>`
         : `<span class="badge-tag">${ratioTag}</span>`;
-      badgeInfo = `${ratioBadge} <span class="badge-broker">${h.broker}</span>`;
+      badgeInfo = `${ratioBadge} ${brokerBadge}`;
       const realAccInfo = h.type === 'CEDEAR' ? `· ${h.realShares.toFixed(2)} Acc. Reales` : '';
       subDesc = `${h.units < 1 ? h.units.toFixed(6) : h.units.toFixed(2)} un. @ ${formatValue(h.avgPrice)} PPP ${realAccInfo}`;
     }
