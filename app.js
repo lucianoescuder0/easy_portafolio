@@ -1744,21 +1744,42 @@ function renderHistory() {
   });
 }
 
+const CATEGORY_LABELS = { CEDEAR: 'CEDEARs', CRYPTO: 'Cripto', ACCION: 'Acciones', YIELD: 'Liquidez' };
+const PIE_SYMBOL_PALETTE = ['#38bdf8', '#ffd60a', '#30d158', '#bf5af2', '#f472b6', '#fb923c', '#22d3ee', '#a3e635', '#818cf8', '#f87171'];
+
 function renderPie(holdingsData) {
   const ctx = document.getElementById('chartPie');
   if (!ctx) return;
   if (chartPieInstance) chartPieInstance.destroy();
 
-  const pieMap = { 'CEDEARs': 0, 'Cripto': 0, 'Acciones': 0, 'Liquidez': 0 };
+  const isFiltered = activeCategoryFilter !== 'ALL';
+  const pieMap = {};
+  let colorMap = {};
   let total = 0;
 
-  holdingsData.forEach(h => {
-    total += h.currentVal;
-    if (h.type === 'CEDEAR') pieMap['CEDEARs'] += h.currentVal;
-    else if (h.type === 'CRYPTO') pieMap['Cripto'] += h.currentVal;
-    else if (h.type === 'ACCION') pieMap['Acciones'] += h.currentVal;
-    else if (h.type === 'YIELD') pieMap['Liquidez'] += h.currentVal;
-  });
+  if (isFiltered) {
+    // Con una categoría seleccionada, mostrar la composición por activo dentro de esa categoría
+    // (un donut de una sola categoría contra el total sería una sola porción, poco útil).
+    holdingsData.filter(h => h.type === activeCategoryFilter).forEach((h, i) => {
+      pieMap[h.symbol] = h.currentVal;
+      total += h.currentVal;
+      colorMap[h.symbol] = PIE_SYMBOL_PALETTE[i % PIE_SYMBOL_PALETTE.length];
+    });
+    const titleEl = document.getElementById('pieChartTitle');
+    if (titleEl) titleEl.innerText = `🍕 Composición de ${CATEGORY_LABELS[activeCategoryFilter] || activeCategoryFilter}`;
+  } else {
+    pieMap['CEDEARs'] = 0; pieMap['Cripto'] = 0; pieMap['Acciones'] = 0; pieMap['Liquidez'] = 0;
+    colorMap = { 'CEDEARs': '#38bdf8', 'Cripto': '#ffd60a', 'Acciones': '#30d158', 'Liquidez': '#bf5af2' };
+    holdingsData.forEach(h => {
+      total += h.currentVal;
+      if (h.type === 'CEDEAR') pieMap['CEDEARs'] += h.currentVal;
+      else if (h.type === 'CRYPTO') pieMap['Cripto'] += h.currentVal;
+      else if (h.type === 'ACCION') pieMap['Acciones'] += h.currentVal;
+      else if (h.type === 'YIELD') pieMap['Liquidez'] += h.currentVal;
+    });
+    const titleEl = document.getElementById('pieChartTitle');
+    if (titleEl) titleEl.innerText = `🍕 Composición de Cartera`;
+  }
 
   const pieCenterVal = document.getElementById('pieCenterVal');
   if (pieCenterVal) {
@@ -1773,6 +1794,7 @@ function renderPie(holdingsData) {
 
   const labels = Object.keys(pieMap).filter(k => pieMap[k] > 0);
   const data = labels.map(k => pieMap[k]);
+  const backgroundColor = labels.map(k => colorMap[k] || '#38bdf8');
   if (labels.length === 0) return;
 
   chartPieInstance = new Chart(ctx.getContext('2d'), {
@@ -1781,7 +1803,7 @@ function renderPie(holdingsData) {
       labels,
       datasets: [{
         data,
-        backgroundColor: ['#38bdf8', '#ffd60a', '#30d158', '#bf5af2'],
+        backgroundColor,
         borderWidth: 2,
         borderColor: '#020408',
         hoverOffset: 6
