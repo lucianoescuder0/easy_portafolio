@@ -3,7 +3,7 @@
 // y usa network-first para los scripts externos (Chart.js, xlsx)
 // así siempre que haya internet se actualizan, pero si no hay red, sirve la copia cacheada.
 
-const CACHE_VERSION = 'portfolio-v1';
+const CACHE_VERSION = 'portfolio-v2';
 const APP_SHELL = [
   './index.html',
   './style.css',
