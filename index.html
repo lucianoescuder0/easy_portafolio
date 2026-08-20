@@ -251,30 +251,12 @@
       <button class="btn-del-mini" onclick="closeModal('modalSettings')">✕</button>
     </div>
     <div class="form-grid">
-      <div style="font-size:0.75rem; font-weight:800; color:var(--muted); text-transform:uppercase;">Tema de Color</div>
-      <select id="themeSelector" onchange="changeTheme(this.value)">
-        <option value="obsidian">🎨 Obsidian (Cyberpunk Neón)</option>
-        <option value="emerald">🌲 Midnight Emerald (Fintech)</option>
-        <option value="sunset">🌅 Sunset Velvet (Violeta & Oro)</option>
-        <option value="slate">🏢 Clean Slate (Gris Ejecutivo)</option>
-      </select>
-
-      <div style="font-size:0.75rem; font-weight:800; color:var(--muted); text-transform:uppercase; margin-top:6px;">Mis Billeteras / Brokers</div>
+      <div style="font-size:0.75rem; font-weight:800; color:var(--muted); text-transform:uppercase;">Mis Billeteras / Brokers</div>
       <div style="display:flex; gap:6px;">
         <input type="text" id="newBrokerNameInput" placeholder="Nueva cuenta..." style="flex:1;">
         <button class="btn-submit" style="width:auto; padding:8px 14px; background:var(--accent); color:#000;" onclick="addNewCustomBroker()">+ Agregar</button>
       </div>
       <div id="customBrokersList" style="display:flex; flex-direction:column; gap:6px; max-height:100px; overflow-y:auto;"></div>
-
-      <div style="font-size:0.75rem; font-weight:800; color:var(--muted); text-transform:uppercase; margin-top:6px;">Agregar Activos Faltantes (CEDEARs)</div>
-      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:6px;">
-        <input type="text" id="newCustomTicker" placeholder="Ticker" style="text-transform:uppercase;">
-        <input type="text" id="newCustomName" placeholder="Nombre">
-        <div style="display:flex; gap:6px;">
-          <input type="number" id="newCustomRatio" placeholder="Ratio">
-          <button class="btn-submit" style="width:auto; padding:8px 14px; background:var(--accent); color:#000;" onclick="addCustomCedear()">+</button>
-        </div>
-      </div>
 
       <div style="font-size:0.75rem; font-weight:800; color:var(--muted); text-transform:uppercase; margin-top:6px;">Importar / Exportar</div>
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">

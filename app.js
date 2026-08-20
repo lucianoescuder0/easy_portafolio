@@ -584,14 +584,6 @@ let chartRoiRankingInstance = null;
 document.getElementById('tradeDate').valueAsDate = new Date();
 document.getElementById('sellDate').valueAsDate = new Date();
 
-function changeTheme(theme) {
-  currentTheme = theme;
-  document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem('port_theme_v43', theme);
-  document.getElementById('themeSelector').value = theme;
-  render();
-}
-
 function openSettingsModal() {
   renderBrokersManagementList();
   openModal('modalSettings');
@@ -631,26 +623,6 @@ function deleteCustomBroker(index) {
   customBrokers.splice(index, 1);
   localStorage.setItem('port_brokers_v43', JSON.stringify(customBrokers));
   renderBrokersManagementList();
-}
-
-function addCustomCedear() {
-  const t = document.getElementById('newCustomTicker').value.trim().toUpperCase();
-  const n = document.getElementById('newCustomName').value.trim();
-  const r = parseFloat(document.getElementById('newCustomRatio').value);
-  
-  if (!t || !n || isNaN(r) || r <= 0) {
-    alert("Completá los campos correctamente.");
-    return;
-  }
-
-  CUSTOM_CEDEARS[t] = { name: n, ratio: r, us: t };
-  localStorage.setItem('port_custom_cedears_v43', JSON.stringify(CUSTOM_CEDEARS));
-  Object.assign(CEDEAR_MAP, CUSTOM_CEDEARS);
-  
-  document.getElementById('newCustomTicker').value = '';
-  document.getElementById('newCustomName').value = '';
-  document.getElementById('newCustomRatio').value = '';
-  alert(`¡${t} agregado con ratio 1:${r}!`);
 }
 
 function populateBrokerSelects() {
@@ -1889,7 +1861,11 @@ function importData(e) {
       else if (parsed && Array.isArray(parsed.transactions)) {
         transactions = parsed.transactions;
         if (Array.isArray(parsed.brokers)) customBrokers = parsed.brokers;
-        if (parsed.theme) changeTheme(parsed.theme);
+        if (parsed.theme) {
+          currentTheme = parsed.theme;
+          document.documentElement.setAttribute('data-theme', currentTheme);
+          localStorage.setItem('port_theme_v43', currentTheme);
+        }
       }
       localStorage.setItem('port_v43_txs', JSON.stringify(transactions));
       localStorage.setItem('port_brokers_v43', JSON.stringify(customBrokers));
@@ -1902,7 +1878,6 @@ function importData(e) {
 }
 
 document.documentElement.setAttribute('data-theme', currentTheme);
-document.getElementById('themeSelector').value = currentTheme;
 populateBrokerSelects();
 render();
 fetchCCL().then(updateLivePrices);
