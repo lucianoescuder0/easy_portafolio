@@ -325,6 +325,10 @@
         <input type="date" id="sellDate">
       </div>
       <div class="input-field">
+        <label style="font-size:0.72rem; color:var(--muted); display:block; margin-bottom:2px;" id="sellBrokerLabel">Billetera / Broker de origen</label>
+        <select id="sellBroker" onchange="updateManageLabels()"></select>
+      </div>
+      <div class="input-field">
         <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
           <label style="font-size:0.72rem; color:var(--muted)" id="sellInput1Label">Cantidad a Vender</label>
           <button type="button" onclick="setSellAll()" style="background:none; border:none; color:var(--accent); font-size:0.72rem; font-weight:700; cursor:pointer;">100%</button>
