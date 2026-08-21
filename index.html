@@ -133,6 +133,7 @@
         <button class="st-btn" id="btnTabDividends" onclick="setMainTab('dividends')">💰 Dividendos & Rentas</button>
         <button class="st-btn" id="btnTabMetrics" onclick="setMainTab('metrics')">📊 Métricas & Gráficos</button>
         <button class="st-btn" id="btnTabHistory" onclick="setMainTab('history')">Libro Contable</button>
+        <button class="st-btn" id="btnTabCatalog" onclick="setMainTab('catalog')">📚 Base de Datos</button>
       </div>
       
       <div style="display:flex; align-items:center; gap:8px;">
@@ -226,6 +227,12 @@
     </div>
 
     <div id="historyView" style="display:none; flex-direction:column; gap:8px;"></div>
+
+    <div id="catalogView" style="display:none; flex-direction:column; gap:12px;">
+      <input type="text" id="catalogSearch" placeholder="Buscar por ticker o nombre (ej: AAPL, YPF, Coca-Cola)..." oninput="renderCatalog()">
+      <div id="catalogCount" style="font-size:0.72rem; color:var(--muted); font-weight:700;"></div>
+      <div id="catalogList" class="catalog-list"></div>
+    </div>
   </div>
 </div>
 

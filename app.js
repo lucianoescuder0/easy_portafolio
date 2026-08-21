@@ -677,10 +677,10 @@ function clearAllData() {
 
 function setMainTab(tab) {
   mainTab = tab;
-  ['btnTabHoldings', 'btnTabDividends', 'btnTabMetrics', 'btnTabHistory'].forEach(b => {
+  ['btnTabHoldings', 'btnTabDividends', 'btnTabMetrics', 'btnTabHistory', 'btnTabCatalog'].forEach(b => {
     if(document.getElementById(b)) document.getElementById(b).classList.remove('active');
   });
-  ['holdingsView', 'dividendsView', 'metricsView', 'historyView'].forEach(v => {
+  ['holdingsView', 'dividendsView', 'metricsView', 'historyView', 'catalogView'].forEach(v => {
     if(document.getElementById(v)) document.getElementById(v).style.display = 'none';
   });
 
@@ -706,7 +706,69 @@ function setMainTab(tab) {
     document.getElementById('historyView').style.display = 'flex';
     document.getElementById('holdingsSortBy').style.display = 'none';
     renderHistory();
+  } else if (tab === 'catalog') {
+    document.getElementById('btnTabCatalog').classList.add('active');
+    document.getElementById('catalogView').style.display = 'flex';
+    document.getElementById('holdingsSortBy').style.display = 'none';
+    renderCatalog();
   }
+}
+
+function renderCatalog() {
+  const list = document.getElementById('catalogList');
+  const countEl = document.getElementById('catalogCount');
+  const q = (document.getElementById('catalogSearch').value || '').trim().toUpperCase();
+  list.innerHTML = '';
+
+  const cedears = Object.entries(CEDEAR_MAP).map(([symbol, info]) => ({ symbol, name: info.name, ratio: info.ratio, type: 'CEDEAR' }));
+  const acciones = Object.entries(ACCIONES_LOCALES).map(([symbol, info]) => ({ symbol, name: info.name, ratio: 1, type: 'ACCION' }));
+  let all = [...cedears, ...acciones].sort((a, b) => a.symbol.localeCompare(b.symbol));
+
+  if (q) all = all.filter(a => a.symbol.includes(q) || a.name.toUpperCase().includes(q));
+
+  countEl.innerText = `${all.length} de ${cedears.length + acciones.length} activos disponibles para agregar`;
+
+  if (all.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">🔍</div>
+        <div class="empty-state-title">Sin resultados</div>
+        <div class="empty-state-sub">Probá con otro ticker o nombre.</div>
+      </div>
+    `;
+    return;
+  }
+
+  const typeStyle = {
+    CEDEAR: { color: 'var(--accent)', bg: 'rgba(56,189,248,0.15)', label: 'CEDEAR' },
+    ACCION: { color: 'var(--green)', bg: 'rgba(48,209,88,0.15)', label: 'Acción ARG' }
+  };
+
+  all.forEach(a => {
+    const s = typeStyle[a.type];
+    const row = document.createElement('div');
+    row.className = 'cat-row';
+    row.innerHTML = `
+      <span class="cat-row-ticker">${a.symbol}</span>
+      <span class="cat-row-name">${a.name}</span>
+      ${a.type === 'CEDEAR' ? `<span class="badge-tag">1:${a.ratio}</span>` : ''}
+      <span class="badge-broker cat-row-type" style="background:${s.bg}; color:${s.color};">${s.label}</span>
+      <button class="cat-row-add" onclick="quickAddFromCatalog('${a.symbol}', '${a.type}')" title="Agregar a mi portafolio">+</button>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function quickAddFromCatalog(symbol, type) {
+  openBuyModal();
+  setCategory(type);
+  document.getElementById('symbol').value = symbol;
+  if (type === 'CEDEAR' && CEDEAR_MAP[symbol]) {
+    selectedAsset = { symbol, name: CEDEAR_MAP[symbol].name, ratio: CEDEAR_MAP[symbol].ratio, type: 'CEDEAR' };
+  } else if (type === 'ACCION' && ACCIONES_LOCALES[symbol]) {
+    selectedAsset = { symbol, name: ACCIONES_LOCALES[symbol].name, ratio: 1, type: 'ACCION' };
+  }
+  updateFormLabels();
 }
 
 function setTimeframe(days) {
