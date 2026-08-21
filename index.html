@@ -198,26 +198,21 @@
         </div>
       </div>
 
-      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:16px;">
-        <div class="chart-container-card">
-          <div class="chart-title" id="pieChartTitle">🍕 Composición de Cartera</div>
-          <div class="chart-box">
-            <canvas id="chartPie"></canvas>
-            <div class="pie-center-label">
-              <div class="pie-center-val" id="pieCenterVal">$0</div>
-              <div class="pie-center-sub">Total</div>
-            </div>
-          </div>
-        </div>
-        <div class="chart-container-card">
-          <div class="chart-title">📈 Evolución del Capital Invertido</div>
-          <div class="chart-box"><canvas id="chartGrowth"></canvas></div>
-        </div>
+      <div class="chart-container-card">
+        <div class="chart-title">📈 Evolución del Patrimonio</div>
+        <div class="chart-box" style="height:260px;"><canvas id="chartGrowth"></canvas></div>
+        <div class="chart-footnote" id="chartGrowthFootnote"></div>
       </div>
 
       <div class="chart-container-card">
-        <div class="chart-title">📊 Curva de Inyección de Capital vs. Valuación Real</div>
-        <div class="chart-box" style="height:200px;"><canvas id="chartInjectionVsVal"></canvas></div>
+        <div class="chart-title" id="pieChartTitle">🍕 Composición de Cartera</div>
+        <div class="chart-box">
+          <canvas id="chartPie"></canvas>
+          <div class="pie-center-label">
+            <div class="pie-center-val" id="pieCenterVal">$0</div>
+            <div class="pie-center-sub">Total</div>
+          </div>
+        </div>
       </div>
 
       <div class="chart-container-card">
@@ -437,6 +432,10 @@
       <div class="help-section">
         <div class="help-q">¿Los precios se actualizan solos?</div>
         <div class="help-a">Sí, al abrir la app y también tocando <b>"↻ Precios"</b>. Cripto viene de Binance en vivo; CEDEARs y acciones locales, de ByMA en vivo.</div>
+      </div>
+      <div class="help-section">
+        <div class="help-q">¿Qué es la línea "Patrimonio Real" del gráfico de Métricas?</div>
+        <div class="help-a">Cada vez que abrís la app, guardamos una foto de cuánto vale tu cartera ese día. Con el tiempo eso arma una curva real de cómo evolucionó tu plata (no solo cuánto invertiste). Arranca desde el día que empezaste a usar esta versión — no inventamos historia de antes.</div>
       </div>
       <div class="help-section">
         <div class="help-q">¿Dónde quedan guardados mis datos?</div>

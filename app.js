@@ -594,8 +594,8 @@ let selectedTimeframeDays = 0;
 
 let chartPieInstance = null;
 let chartGrowthInstance = null;
-let chartInjectionVsValInstance = null;
 let chartRoiRankingInstance = null;
+let netWorthHistory = JSON.parse(localStorage.getItem('port_v43_networth_history')) || [];
 
 document.getElementById('tradeDate').valueAsDate = new Date();
 document.getElementById('sellDate').valueAsDate = new Date();
@@ -670,7 +670,9 @@ function setCategoryFilter(cat) {
 function clearAllData() {
   if (!confirm('¿Deseas vaciar todas las operaciones?')) return;
   transactions = [];
+  netWorthHistory = [];
   localStorage.removeItem('port_v43_txs');
+  localStorage.removeItem('port_v43_networth_history');
   render();
   alert('Portafolio reiniciado.');
 }
@@ -1510,82 +1512,6 @@ function renderMetricsAdvanced() {
   document.getElementById('metricInjections').innerText = formatValue(costBasisTotal);
   document.getElementById('metricPeakCapital').innerText = formatValue(peakCapital);
 
-  const ctx1 = document.getElementById('chartInjectionVsVal');
-  if (ctx1) {
-    if (chartInjectionVsValInstance) chartInjectionVsValInstance.destroy();
-
-    const dateMap = {};
-    let runningCost = 0;
-
-    filteredTxs.forEach(t => {
-      runningCost += (t.side === 'SELL' ? -1 : 1) * (t.units * t.priceUSD);
-      const currentP = livePrices[t.symbol] || t.priceUSD;
-      const currVal = (runningCost / (t.priceUSD || 1)) * currentP;
-      dateMap[t.date] = { cost: Math.max(0, runningCost), val: Math.max(0, currVal) };
-    });
-
-    const todayStr = new Date().toISOString().slice(0, 10);
-    if(!dateMap[todayStr]) {
-      dateMap[todayStr] = { cost: costBasisTotal, val: currentValTotal };
-    }
-
-    const labels1 = Object.keys(dateMap).sort();
-    const injectedPoints = labels1.map(d => dateMap[d].cost);
-    const marketValPoints = labels1.map(d => dateMap[d].val);
-
-    chartInjectionVsValInstance = new Chart(ctx1.getContext('2d'), {
-      type: 'line',
-      data: {
-        labels: labels1,
-        datasets: [
-          { 
-            label: 'Inyección (Costo)', 
-            data: injectedPoints, 
-            borderColor: 'rgba(148, 163, 184, 0.8)', 
-            borderDash: [5, 5], 
-            pointRadius: 3, 
-            fill: false,
-            stepped: 'before'
-          },
-          { 
-            label: 'Valuación Real', 
-            data: marketValPoints, 
-            borderColor: '#38bdf8', 
-            backgroundColor: 'rgba(56, 189, 248, 0.08)', 
-            pointRadius: 4, 
-            fill: true, 
-            tension: 0.3 
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 9 }, maxTicksLimit: 6 } },
-          y: { 
-            grid: { color: 'rgba(255,255,255,0.04)' }, 
-            ticks: { 
-              color: '#94a3b8', font: { size: 9 }, 
-              callback: (v) => formatValue(v)
-            } 
-          }
-        },
-        plugins: { 
-          legend: { position: 'top', labels: { boxWidth: 10, color: '#f8fafc', font: { size: 11, weight: 600 } } },
-          tooltip: {
-            backgroundColor: '#0d121c',
-            titleColor: '#f8fafc',
-            bodyColor: '#cbd5e1',
-            borderColor: 'rgba(255,255,255,0.15)',
-            borderWidth: 1,
-            padding: 10
-          }
-        }
-      }
-    });
-  }
-
   const ctx2 = document.getElementById('chartRoiRanking');
   if (ctx2) {
     if (chartRoiRankingInstance) chartRoiRankingInstance.destroy();
@@ -1618,6 +1544,18 @@ function renderMetricsAdvanced() {
       }
     });
   }
+}
+
+function recordNetWorthSnapshot(valueUSD) {
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const existing = netWorthHistory.find(e => e.date === todayStr);
+  if (existing) {
+    existing.value = valueUSD;
+  } else {
+    netWorthHistory.push({ date: todayStr, value: valueUSD });
+    netWorthHistory.sort((a, b) => a.date.localeCompare(b.date));
+  }
+  localStorage.setItem('port_v43_networth_history', JSON.stringify(netWorthHistory));
 }
 
 function render() {
@@ -1657,6 +1595,8 @@ function render() {
     todayChangeUSD += (h.currentVal * pct24) / 100;
     if (!biggestHolding || h.currentVal > biggestHolding.currentVal) biggestHolding = h;
   });
+
+  if (transactions.length > 0) recordNetWorthSnapshot(totalWorth);
 
   if (holdings.length === 0) {
     list.innerHTML = `
@@ -1965,55 +1905,86 @@ function renderGrowthChart() {
   if (!ctx) return;
   if (chartGrowthInstance) chartGrowthInstance.destroy();
 
+  // Capital invertido acumulado (referencia: cuánta plata metiste, no cuánto vale hoy)
   const validTxs = transactions.filter(t => t.date && !isNaN(new Date(t.date).getTime()));
-  validTxs.sort((a,b) => new Date(a.date) - new Date(b.date));
-
-  const dateMap = {};
+  validTxs.sort((a, b) => new Date(a.date) - new Date(b.date));
+  const injectedMap = {};
   let runningCapital = 0;
-
   validTxs.forEach(t => {
     runningCapital += (t.side === 'SELL' ? -1 : 1) * (t.units * t.priceUSD);
-    dateMap[t.date] = Math.max(0, runningCapital);
+    injectedMap[t.date] = Math.max(0, runningCapital);
   });
-
   const todayStr = new Date().toISOString().slice(0, 10);
-  if(!dateMap[todayStr]) dateMap[todayStr] = runningCapital;
+  if (!injectedMap[todayStr]) injectedMap[todayStr] = runningCapital;
 
-  const labels = Object.keys(dateMap).sort();
-  const dataPoints = labels.map(d => dateMap[d]);
+  // Patrimonio real: solo las fechas donde efectivamente guardamos una foto del valor de
+  // mercado (recordNetWorthSnapshot, una por día). No se inventa nada hacia atrás.
+  const realMap = {};
+  netWorthHistory.forEach(e => { realMap[e.date] = e.value; });
+
+  const labels = [...new Set([...Object.keys(injectedMap), ...Object.keys(realMap)])].sort();
   if (labels.length === 0) return;
+
+  let lastInjected = 0;
+  const injectedPoints = labels.map(d => {
+    if (injectedMap[d] !== undefined) lastInjected = injectedMap[d];
+    return lastInjected;
+  });
+  const realPoints = labels.map(d => realMap[d] !== undefined ? realMap[d] : null);
+
+  const footnote = document.getElementById('chartGrowthFootnote');
+  if (footnote) {
+    footnote.innerText = netWorthHistory.length > 0
+      ? `La curva de patrimonio real arranca el ${netWorthHistory[0].date} — antes de esa fecha solo se ve el capital invertido, porque recién ahí empezamos a guardar el valor real día a día.`
+      : `Todavía no hay historial de patrimonio real: se va a empezar a construir solo, un punto por día, a partir de hoy.`;
+  }
 
   chartGrowthInstance = new Chart(ctx.getContext('2d'), {
     type: 'line',
     data: {
       labels,
-      datasets: [{
-        data: dataPoints,
-        borderColor: '#38bdf8',
-        backgroundColor: 'rgba(56, 189, 248, 0.05)',
-        fill: true,
-        stepped: 'before',
-        pointRadius: 4,
-        pointBackgroundColor: '#38bdf8'
-      }]
+      datasets: [
+        {
+          label: 'Capital Invertido',
+          data: injectedPoints,
+          borderColor: 'rgba(148, 163, 184, 0.8)',
+          borderDash: [5, 5],
+          pointRadius: 0,
+          fill: false,
+          stepped: 'before'
+        },
+        {
+          label: 'Patrimonio Real',
+          data: realPoints,
+          borderColor: '#38bdf8',
+          backgroundColor: 'rgba(56, 189, 248, 0.1)',
+          pointRadius: 3,
+          pointBackgroundColor: '#38bdf8',
+          fill: true,
+          tension: 0.3,
+          spanGaps: true
+        }
+      ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       scales: {
         x: { grid: { display: false }, ticks: { color: '#717d96', font: { size: 9 }, maxTicksLimit: 6 } },
-        y: { 
-          grid: { color: 'rgba(255,255,255,0.03)' }, 
-          ticks: { 
-            color: '#717d96', font: { size: 9 }, 
+        y: {
+          grid: { color: 'rgba(255,255,255,0.03)' },
+          ticks: {
+            color: '#717d96', font: { size: 9 },
             callback: (v) => formatValue(v)
-          } 
+          }
         }
       },
       plugins: {
-        legend: { display: false },
+        legend: { position: 'top', labels: { boxWidth: 10, color: '#f8fafc', font: { size: 11, weight: 600 } } },
         tooltip: {
           backgroundColor: '#0d121c',
+          titleColor: '#f8fafc',
+          bodyColor: '#cbd5e1',
           borderColor: 'rgba(255,255,255,0.1)',
           borderWidth: 1,
           padding: 10
@@ -2043,7 +2014,7 @@ function exportCSV() {
 }
 
 function exportData() {
-  const backupPayload = { version: "43.0", exportDate: new Date().toISOString(), theme: currentTheme, brokers: customBrokers, transactions: transactions };
+  const backupPayload = { version: "43.0", exportDate: new Date().toISOString(), theme: currentTheme, brokers: customBrokers, transactions: transactions, netWorthHistory: netWorthHistory };
   const blob = new Blob([JSON.stringify(backupPayload, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -2062,6 +2033,7 @@ function importData(e) {
       else if (parsed && Array.isArray(parsed.transactions)) {
         transactions = parsed.transactions;
         if (Array.isArray(parsed.brokers)) customBrokers = parsed.brokers;
+        if (Array.isArray(parsed.netWorthHistory)) netWorthHistory = parsed.netWorthHistory;
         if (parsed.theme) {
           currentTheme = parsed.theme;
           document.documentElement.setAttribute('data-theme', currentTheme);
@@ -2070,6 +2042,7 @@ function importData(e) {
       }
       localStorage.setItem('port_v43_txs', JSON.stringify(transactions));
       localStorage.setItem('port_brokers_v43', JSON.stringify(customBrokers));
+      localStorage.setItem('port_v43_networth_history', JSON.stringify(netWorthHistory));
       render();
       updateLivePrices();
       alert('¡Datos importados!');

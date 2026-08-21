@@ -442,6 +442,7 @@ body {
   display: flex; align-items: center; gap: 6px;
 }
 .chart-box { position: relative; height: 230px; margin-top: 4px; }
+.chart-footnote { font-size: 0.7rem; color: var(--muted); margin-top: 10px; line-height: 1.5; }
 
 .pie-center-label {
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
