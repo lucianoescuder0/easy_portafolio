@@ -269,9 +269,15 @@ body {
 .h-item.cat-yield::before  { background: #bf5af2; box-shadow: 0 0 10px rgba(191, 90, 242, 0.7); }
 
 /* Libro Contable: mismo look de fila que las tenencias, pero sin la columna central de 24h */
-.h-item.ledger-item { display: flex; justify-content: space-between; align-items: center; gap: 14px; }
+.h-item.ledger-item { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; }
 .h-item.ledger-item .h-left { flex: 1; min-width: 0; }
 .h-item.ledger-item .h-company { max-width: none; }
+.ledger-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+
+@media (max-width: 480px) {
+  .h-item.ledger-item .h-left { flex-basis: 100%; }
+  .h-item.ledger-item .ledger-right { flex-basis: 100%; justify-content: flex-end; }
+}
 
 .h-item-watermark {
   position: absolute;
@@ -309,11 +315,11 @@ body {
   color: #fff; letter-spacing: 0.3px; text-shadow: 0 1px 2px rgba(0,0,0,0.25);
 }
 
-.h-titles { display: flex; flex-direction: column; gap: 2px; }
+.h-titles { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .h-name-row { display: flex; align-items: center; gap: 8px; }
 .h-ticker { font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; color: #ffffff; letter-spacing: -0.2px; }
 .h-company { font-size: 0.8rem; color: var(--text-dim); font-weight: 600; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.h-sub { font-size: 0.74rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.h-sub { font-size: 0.74rem; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .badge-tag { font-size: 0.65rem; padding: 2px 6px; border-radius: 6px; background: rgba(56,189,248,0.15); color: var(--accent); font-weight: 700; }
 .badge-broker { font-size: 0.65rem; padding: 2px 6px; border-radius: 6px; background: rgba(255,255,255,0.08); color: var(--text-dim); font-weight: 700; }

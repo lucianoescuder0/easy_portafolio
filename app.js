@@ -1900,7 +1900,7 @@ function renderHistory() {
         </div>
       </div>
 
-      <div style="display:flex; align-items:center; gap:12px;">
+      <div class="ledger-right">
         <div class="h-val" style="font-size:1.05rem;">${formatValue(totalUSD)}</div>
         <button class="btn-del-mini" title="Eliminar registro" onclick="deleteSingleTx(${t.id})">✕</button>
       </div>
