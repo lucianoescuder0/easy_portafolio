@@ -913,6 +913,32 @@ function updateManageLabels() {
   }
 }
 
+function populateSellBrokerSelect(pos) {
+  const sel = document.getElementById('sellBroker');
+  const field = sel.closest('.input-field');
+  if (!sel) return;
+  sel.innerHTML = '';
+
+  if (pos.brokerBreakdown.length <= 1) {
+    // Una sola billetera/broker con tenencia: no hace falta elegir.
+    if (field) field.style.display = 'none';
+    const opt = document.createElement('option');
+    opt.value = pos.brokerBreakdown[0] ? pos.brokerBreakdown[0].broker : (pos.broker || 'Custodia Principal');
+    opt.innerText = opt.value;
+    sel.appendChild(opt);
+    return;
+  }
+
+  if (field) field.style.display = 'block';
+  pos.brokerBreakdown.forEach(b => {
+    const opt = document.createElement('option');
+    opt.value = b.broker;
+    const unitsText = b.units < 1 ? b.units.toFixed(6) : b.units.toFixed(4);
+    opt.innerText = `${b.broker} (${unitsText} disponibles)`;
+    sel.appendChild(opt);
+  });
+}
+
 function openManageModal(symbol) {
   managingSymbol = symbol;
   const holdings = getConsolidatedHoldings();
@@ -926,6 +952,7 @@ function openManageModal(symbol) {
   document.getElementById('manageCedearSection').style.display = pos.type === 'CEDEAR' ? 'block' : 'none';
   if (pos.type === 'CEDEAR') document.getElementById('customRatioInput').value = pos.ratio;
 
+  populateSellBrokerSelect(pos);
   updateManageLabels();
   openModal('modalManage');
 }
@@ -1030,13 +1057,20 @@ function executeSale() {
   let v2 = isStable ? 1 : parseFloat(document.getElementById('sellInput2').value);
   const date = document.getElementById('sellDate').value || new Date().toISOString().slice(0, 10);
   const curr = document.getElementById('sellCurrency').value;
+  const broker = document.getElementById('sellBroker').value || (pos.brokerBreakdown[0] ? pos.brokerBreakdown[0].broker : pos.broker);
 
   if (isNaN(v1) || isNaN(v2) || v1 <= 0 || v2 <= 0) return;
-  
+
   let priceUSD = isStable ? 1 : (curr === 'ARS' ? (v2 / cclRate) : v2);
 
   if (v1 > (pos.units + 0.000001)) {
     alert('No podés vender más unidades de las disponibles.');
+    return;
+  }
+
+  const brokerEntry = pos.brokerBreakdown.find(b => b.broker === broker);
+  if (brokerEntry && v1 > (brokerEntry.units + 0.000001)) {
+    alert(`No podés vender más unidades de las que tenés en "${broker}" (disponibles: ${brokerEntry.units.toFixed(6)}).`);
     return;
   }
 
@@ -1045,6 +1079,7 @@ function executeSale() {
     side: 'SELL',
     symbol: managingSymbol,
     type: pos.type,
+    broker,
     units: v1,
     priceUSD: priceUSD,
     date: date,
@@ -1267,6 +1302,21 @@ function getConsolidatedHoldings(ignoreFilter) {
       const soldUnits = Math.min(t.units, h.units);
       h.units -= soldUnits;
       h.totalCostUSD -= (soldUnits * avgCost);
+
+      const sellBroker = t.broker;
+      if (sellBroker && h.brokerBuys[sellBroker] !== undefined) {
+        // Sabemos de qué billetera/broker salió: se descuenta de ahí directamente.
+        h.brokerBuys[sellBroker] = Math.max(0, h.brokerBuys[sellBroker] - soldUnits);
+      } else {
+        // Venta vieja sin billetera registrada: reparto proporcional entre todas
+        // (no sabemos de dónde salió).
+        const grossBought = Object.values(h.brokerBuys).reduce((a, b) => a + b, 0);
+        if (grossBought > 0.000001) {
+          Object.keys(h.brokerBuys).forEach(b => {
+            h.brokerBuys[b] = Math.max(0, h.brokerBuys[b] - soldUnits * (h.brokerBuys[b] / grossBought));
+          });
+        }
+      }
     }
   });
 
@@ -1291,8 +1341,9 @@ function getConsolidatedHoldings(ignoreFilter) {
     else if (ACCIONES_LOCALES[h.symbol]) companyName = ACCIONES_LOCALES[h.symbol].name;
     else if (h.type === 'YIELD') companyName = h.symbol.replace('_', ' ');
 
-    // Reparto por broker a prorrata de lo comprado en cada uno (si hubo ventas parciales,
-    // no sabemos de qué broker salieron, así que se descuentan proporcionalmente entre todos).
+    // h.brokerBuys ya viene neto de ventas (se descontó de la billetera real si se
+    // registró, o proporcionalmente si era una venta vieja sin billetera). grossBought
+    // coincide con h.units, así que este mapeo devuelve las unidades netas por broker.
     const grossBought = Object.values(h.brokerBuys).reduce((a, b) => a + b, 0);
     const brokerBreakdown = Object.entries(h.brokerBuys)
       .map(([broker, boughtUnits]) => ({
