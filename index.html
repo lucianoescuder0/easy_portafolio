@@ -34,7 +34,7 @@
         <span id="badgeToday" class="pill pos">Hoy: +$0.00 (0.00%)</span>
         <span class="pill cost" id="badgeTotalCost">Invertido: $0.00 USD</span>
         <span class="pill mep" id="mepRate">MEP $1.250</span>
-        <span class="pill div" id="badgeDividends" style="display:none;">💰 Este mes: $0.00</span>
+        <span class="pill div" id="badgeDividends" style="display:none;" title="Estimado, no validado en vivo — ver pestaña Dividendos & Rentas">💰 Este mes: $0.00</span>
       </div>
     </div>
     
@@ -152,6 +152,7 @@
     <div id="holdingsView" class="holdings-list"></div>
 
     <div id="dividendsView" style="display:none; flex-direction:column; gap:12px;">
+      <div class="chart-footnote">⚠ Estimado, no en vivo: los meses de pago y el monto por acción son una tabla fija a mano para un puñado de empresas conocidas, no se valida contra ninguna fuente en tiempo real. Puede estar desactualizado o no incluir lo que tenés.</div>
       <div id="monthlyCalendarContainer" class="calendar-grid"></div>
       <div id="dividendsTableContainer" style="margin-top:10px;"></div>
     </div>
@@ -436,6 +437,14 @@
       <div class="help-section">
         <div class="help-q">¿Qué es la línea "Patrimonio Real" del gráfico de Métricas?</div>
         <div class="help-a">Cada vez que abrís la app, guardamos una foto de cuánto vale tu cartera ese día. Con el tiempo eso arma una curva real de cómo evolucionó tu plata (no solo cuánto invertiste). Arranca desde el día que empezaste a usar esta versión — no inventamos historia de antes.</div>
+      </div>
+      <div class="help-section">
+        <div class="help-q">¿Los dividendos que muestra la app están validados en vivo?</div>
+        <div class="help-a">No. Es una tabla fija a mano (mes de pago y monto estimado por acción) para un puñado de empresas conocidas — no se compara contra ninguna fuente en tiempo real, así que puede quedar desactualizada o no tener el activo que buscás.</div>
+      </div>
+      <div class="help-section">
+        <div class="help-q">¿Por qué mis Fondos (FCI) aparecen separados de "Liquidez" en Métricas?</div>
+        <div class="help-a">Si el nombre que le pusiste a una posición de Liquidez contiene "FCI", el gráfico de Composición lo agrupa aparte en vez de mezclarlo con saldos de billetera — son cosas distintas (una es un fondo con rendimiento variable, la otra es efectivo).</div>
       </div>
       <div class="help-section">
         <div class="help-q">¿Dónde quedan guardados mis datos?</div>

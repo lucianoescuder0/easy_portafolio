@@ -1,11 +1,4 @@
 const SPECIFIC_LOGOS = {
-  'BTC': 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
-  'ETH': 'https://assets.coingecko.com/coins/images/279/large/ethereum.png',
-  'BNB': 'https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png',
-  'SOL': 'https://assets.coingecko.com/coins/images/4128/large/solana.png',
-  'USDT': 'https://assets.coingecko.com/coins/images/325/large/Tether.png',
-  'USDC': 'https://assets.coingecko.com/coins/images/6319/large/usdc.png',
-  'DAI': 'https://assets.coingecko.com/coins/images/9956/large/Badge_Dai.png',
   'AAPL': 'https://raw.githubusercontent.com/tandpfun/skill-icons/main/icons/Apple-Dark.svg',
   'GOOGL': 'https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg',
   'MSFT': 'https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg',
@@ -18,6 +11,62 @@ const SPECIFIC_LOGOS = {
   'PYPL': 'https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg',
   'LMT': 'https://upload.wikimedia.org/wikipedia/commons/9/99/Lockheed_Martin_logo.svg'
 };
+
+// Lista curada para las sugerencias del buscador. No hace falta que esté todo cripto que
+// exista: cualquier ticker no listado igual se puede cargar a mano (ver handleSearch) y el
+// precio se busca en vivo contra Binance por símbolo.
+const CRYPTO_LIST = [
+  { symbol: 'BTC', name: 'Bitcoin', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'ETH', name: 'Ethereum', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'USDT', name: 'Tether USD', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'USDC', name: 'USD Coin', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'DAI', name: 'Dai', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'SOL', name: 'Solana', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'BNB', name: 'Binance Coin', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'XRP', name: 'XRP', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'ADA', name: 'Cardano', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'DOGE', name: 'Dogecoin', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'TRX', name: 'Tron', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'TON', name: 'Toncoin', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'DOT', name: 'Polkadot', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'MATIC', name: 'Polygon', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'LTC', name: 'Litecoin', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'LINK', name: 'Chainlink', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'AVAX', name: 'Avalanche', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'ATOM', name: 'Cosmos', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'UNI', name: 'Uniswap', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'XLM', name: 'Stellar', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'ETC', name: 'Ethereum Classic', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'FIL', name: 'Filecoin', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'APT', name: 'Aptos', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'ARB', name: 'Arbitrum', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'OP', name: 'Optimism', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'NEAR', name: 'NEAR Protocol', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'SUI', name: 'Sui', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'SHIB', name: 'Shiba Inu', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'PEPE', name: 'Pepe', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'WIF', name: 'dogwifhat', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'BONK', name: 'Bonk', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'INJ', name: 'Injective', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'RUNE', name: 'THORChain', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'RENDER', name: 'Render', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'FTM', name: 'Fantom', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'ALGO', name: 'Algorand', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'VET', name: 'VeChain', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'SAND', name: 'The Sandbox', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'MANA', name: 'Decentraland', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'AAVE', name: 'Aave', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'MKR', name: 'Maker', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'GRT', name: 'The Graph', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'NEXO', name: 'Nexo', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'CRV', name: 'Curve DAO', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'LDO', name: 'Lido DAO', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'PYTH', name: 'Pyth Network', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'JUP', name: 'Jupiter', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'WLD', name: 'Worldcoin', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'GALA', name: 'Gala', ratio: 1, type: 'CRYPTO' },
+  { symbol: 'CHZ', name: 'Chiliz', ratio: 1, type: 'CRYPTO' }
+];
 
 const ASSET_GLOW_COLORS = {
   'AAPL': 'rgba(255, 255, 255, 0.05)',
@@ -481,6 +530,10 @@ const LOGO_SYMBOL_OVERRIDES = {
 };
 
 function getAssetLogoUrl(h) {
+  if (h.type === 'CRYPTO') {
+    // CoinCap cubre prácticamente cualquier moneda por símbolo, no hace falta curar una lista.
+    return `https://assets.coincap.io/assets/icons/${h.symbol.toLowerCase()}@2x.png`;
+  }
   if (SPECIFIC_LOGOS[h.symbol]) return SPECIFIC_LOGOS[h.symbol];
   if (h.type !== 'CEDEAR' && h.type !== 'ACCION') return null;
   const ticker = LOGO_SYMBOL_OVERRIDES[h.symbol] || (CEDEAR_MAP[h.symbol] && CEDEAR_MAP[h.symbol].us) || h.symbol;
@@ -1095,19 +1148,18 @@ async function handleSearch() {
     matches = Object.keys(ACCIONES_LOCALES).filter(k => k.includes(q) || ACCIONES_LOCALES[k].name.toUpperCase().includes(q))
       .map(k => ({ symbol: k, name: ACCIONES_LOCALES[k].name, ratio: 1, type: 'ACCION' }));
   } else {
-    const TOP_CRYPTOS = [
-      { symbol: 'BTC', name: 'Bitcoin', ratio: 1, type: 'CRYPTO' },
-      { symbol: 'ETH', name: 'Ethereum', ratio: 1, type: 'CRYPTO' },
-      { symbol: 'USDT', name: 'Tether USD', ratio: 1, type: 'CRYPTO' },
-      { symbol: 'USDC', name: 'USD Coin', ratio: 1, type: 'CRYPTO' },
-      { symbol: 'SOL', name: 'Solana', ratio: 1, type: 'CRYPTO' },
-      { symbol: 'BNB', name: 'Binance Coin', ratio: 1, type: 'CRYPTO' }
-    ];
-    matches = TOP_CRYPTOS.filter(x => x.symbol.startsWith(q) || x.name.toUpperCase().includes(q));
+    matches = CRYPTO_LIST.filter(x => x.symbol.startsWith(q) || x.name.toUpperCase().includes(q));
+    // Binance lista miles de pares — si no está en la lista curada pero el texto parece un
+    // ticker válido, dejamos usarlo igual (el precio se busca en vivo por símbolo, no hace
+    // falta que esté precargado acá).
+    const isKnown = matches.some(x => x.symbol === q);
+    if (!isKnown && /^[A-Z0-9]{2,10}$/.test(q)) {
+      matches = [{ symbol: q, name: `Usar "${q}" como ticker (busca ${q}USDT en Binance)`, ratio: 1, type: 'CRYPTO' }, ...matches];
+    }
   }
 
   if (matches.length === 0) { drop.style.display = 'none'; return; }
-  
+
   matches.forEach(item => {
     const div = document.createElement('div');
     div.style.padding = '10px 14px';
@@ -1792,6 +1844,13 @@ function renderHistory() {
 }
 
 const CATEGORY_LABELS = { CEDEAR: 'CEDEARs', CRYPTO: 'Cripto', ACCION: 'Acciones', YIELD: 'Liquidez' };
+
+// Dentro de "Liquidez" (YIELD) se cargan tanto saldos de billetera como Fondos Comunes de
+// Inversión. No hay catálogo de FCI (el nombre es texto libre), así que se detectan por
+// "FCI" en lo que el usuario tipeó como símbolo/nombre — para no mezclarlos en Métricas.
+function isFCIHolding(h) {
+  return h.type === 'YIELD' && /FCI/i.test(h.symbol);
+}
 const PIE_SYMBOL_PALETTE = ['#38bdf8', '#ffd60a', '#30d158', '#bf5af2', '#f472b6', '#fb923c', '#22d3ee', '#a3e635', '#818cf8', '#f87171'];
 
 function renderPie(holdingsData) {
@@ -1815,14 +1874,14 @@ function renderPie(holdingsData) {
     const titleEl = document.getElementById('pieChartTitle');
     if (titleEl) titleEl.innerText = `🍕 Composición de ${CATEGORY_LABELS[activeCategoryFilter] || activeCategoryFilter}`;
   } else {
-    pieMap['CEDEARs'] = 0; pieMap['Cripto'] = 0; pieMap['Acciones'] = 0; pieMap['Liquidez'] = 0;
-    colorMap = { 'CEDEARs': '#38bdf8', 'Cripto': '#ffd60a', 'Acciones': '#30d158', 'Liquidez': '#bf5af2' };
+    pieMap['CEDEARs'] = 0; pieMap['Cripto'] = 0; pieMap['Acciones'] = 0; pieMap['Liquidez'] = 0; pieMap['Fondos (FCI)'] = 0;
+    colorMap = { 'CEDEARs': '#38bdf8', 'Cripto': '#ffd60a', 'Acciones': '#30d158', 'Liquidez': '#bf5af2', 'Fondos (FCI)': '#22d3ee' };
     holdingsData.forEach(h => {
       total += h.currentVal;
       if (h.type === 'CEDEAR') pieMap['CEDEARs'] += h.currentVal;
       else if (h.type === 'CRYPTO') pieMap['Cripto'] += h.currentVal;
       else if (h.type === 'ACCION') pieMap['Acciones'] += h.currentVal;
-      else if (h.type === 'YIELD') pieMap['Liquidez'] += h.currentVal;
+      else if (h.type === 'YIELD') pieMap[isFCIHolding(h) ? 'Fondos (FCI)' : 'Liquidez'] += h.currentVal;
     });
     const titleEl = document.getElementById('pieChartTitle');
     if (titleEl) titleEl.innerText = `🍕 Composición de Cartera`;
