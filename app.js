@@ -1118,6 +1118,19 @@ function updateFormLabels() {
   }
 }
 
+let binanceCryptoSymbols = [];
+
+async function loadBinanceCryptoSymbols() {
+  try {
+    const r = await fetch('https://api.binance.com/api/v3/ticker/price');
+    const d = await r.json();
+    binanceCryptoSymbols = d
+      .map(x => x.symbol)
+      .filter(s => s.endsWith('USDT') && s !== 'USDT')
+      .map(s => s.slice(0, -4));
+  } catch (e) {}
+}
+
 async function fetchCCL() {
   try {
     const res = await fetch('https://dolarapi.com/v1/dolares/bolsa');
@@ -1148,14 +1161,16 @@ async function handleSearch() {
     matches = Object.keys(ACCIONES_LOCALES).filter(k => k.includes(q) || ACCIONES_LOCALES[k].name.toUpperCase().includes(q))
       .map(k => ({ symbol: k, name: ACCIONES_LOCALES[k].name, ratio: 1, type: 'ACCION' }));
   } else {
-    matches = CRYPTO_LIST.filter(x => x.symbol.startsWith(q) || x.name.toUpperCase().includes(q));
-    // Binance lista miles de pares — si no está en la lista curada pero el texto parece un
-    // ticker válido, dejamos usarlo igual (el precio se busca en vivo por símbolo, no hace
-    // falta que esté precargado acá).
-    const isKnown = matches.some(x => x.symbol === q);
-    if (!isKnown && /^[A-Z0-9]{2,10}$/.test(q)) {
-      matches = [{ symbol: q, name: `Usar "${q}" como ticker (busca ${q}USDT en Binance)`, ratio: 1, type: 'CRYPTO' }, ...matches];
-    }
+    // Se busca solo entre monedas que Binance efectivamente lista contra USDT — la misma
+    // fuente de donde traemos el precio en vivo. Así lo que aparece en el buscador siempre
+    // va a poder trackear ganancia/pérdida; no se ofrece nada "a ciegas".
+    const known = new Map(CRYPTO_LIST.map(c => [c.symbol, c.name]));
+    const source = binanceCryptoSymbols.length > 0 ? binanceCryptoSymbols : CRYPTO_LIST.map(c => c.symbol);
+    matches = source
+      .filter(sym => sym.startsWith(q) || (known.get(sym) || '').toUpperCase().includes(q))
+      .sort((a, b) => (known.has(b) - known.has(a)) || a.localeCompare(b))
+      .slice(0, 40)
+      .map(sym => ({ symbol: sym, name: known.get(sym) || 'Cripto (Binance)', ratio: 1, type: 'CRYPTO' }));
   }
 
   if (matches.length === 0) { drop.style.display = 'none'; return; }
@@ -2114,3 +2129,4 @@ document.documentElement.setAttribute('data-theme', currentTheme);
 populateBrokerSelects();
 render();
 fetchCCL().then(updateLivePrices);
+loadBinanceCryptoSymbols();
