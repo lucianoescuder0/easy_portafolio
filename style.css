@@ -91,6 +91,7 @@ body {
 .pill.neg { background: var(--red-glow); color: var(--red); border: 1px solid rgba(255, 69, 58, 0.3); }
 .pill.mep { background: var(--accent-glow); color: var(--accent); border: 1px solid var(--accent); }
 .pill.cost { background: rgba(255, 255, 255, 0.05); color: var(--text-dim); border: 1px solid var(--border); }
+.pill.div { background: rgba(255, 214, 10, 0.12); color: var(--gold); border: 1px solid rgba(255, 214, 10, 0.35); }
 
 .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .curr-switch {
@@ -373,8 +374,7 @@ body {
 /* ============================================================
    MÉTRICAS & GRÁFICOS
    ============================================================ */
-.analytics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-@media (max-width: 900px) { .analytics-grid { grid-template-columns: 1fr 1fr; } }
+.analytics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
 @media (max-width: 500px) { .analytics-grid { grid-template-columns: 1fr; } }
 
 .a-card {
@@ -391,6 +391,7 @@ body {
 .a-card.m-gain::before { background: linear-gradient(90deg, transparent, var(--green), transparent); }
 .a-card.m-inj::before  { background: linear-gradient(90deg, transparent, var(--accent-2), transparent); }
 .a-card.m-peak::before { background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+.a-card.m-conc::before { background: linear-gradient(90deg, transparent, var(--red), transparent); }
 
 .a-icon {
   width: 30px; height: 30px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
@@ -402,6 +403,7 @@ body {
 .a-card.m-gain .a-icon { color: var(--green); }
 .a-card.m-inj .a-icon  { color: var(--accent-2); }
 .a-card.m-peak .a-icon { color: var(--gold); }
+.a-card.m-conc .a-icon { color: var(--red); }
 
 .a-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.6px; }
 .a-val { font-family: var(--font-display); font-size: 1.35rem; font-weight: 800; margin-top: 6px; color: #ffffff; }

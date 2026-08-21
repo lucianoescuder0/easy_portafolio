@@ -1105,7 +1105,7 @@ function saveAsset() {
   updateLivePrices();
 }
 
-function getConsolidatedHoldings() {
+function getConsolidatedHoldings(ignoreFilter) {
   const sorted = [...transactions].sort((a,b) => new Date(a.date) - new Date(b.date));
   const holdings = {};
 
@@ -1174,7 +1174,7 @@ function getConsolidatedHoldings() {
     return { ...h, companyName, avgPrice, currentPrice, currentVal, pnl, pnlPct, realShares, brokerBreakdown };
   });
 
-  if (activeCategoryFilter !== 'ALL') {
+  if (!ignoreFilter && activeCategoryFilter !== 'ALL') {
     list = list.filter(h => h.type === activeCategoryFilter);
   }
 
@@ -1285,6 +1285,20 @@ function populateMetricsFilter() {
   });
 
   if ([...select.options].some(o => o.value === currentSelected)) select.value = currentSelected;
+}
+
+function computeCurrentMonthDividends() {
+  const holdings = getConsolidatedHoldings(true);
+  const nowMonth = new Date().getMonth() + 1;
+  let total = 0;
+  holdings.forEach(h => {
+    const info = DIVIDEND_SCHEDULE[h.symbol];
+    if (!info || !info.monthNums.includes(nowMonth)) return;
+    let payout = h.realShares * info.estDpa;
+    if (info.currency === 'ARS') payout = payout / cclRate;
+    total += payout;
+  });
+  return total;
 }
 
 function renderDividendsTable() {
@@ -1565,6 +1579,8 @@ function render() {
 
   let totalWorth = 0;
   let totalCost = 0;
+  let todayChangeUSD = 0;
+  let biggestHolding = null;
   let catTotals = { CEDEAR: 0, CRYPTO: 0, ACCION: 0, YIELD: 0 };
   let catCosts = { CEDEAR: 0, CRYPTO: 0, ACCION: 0, YIELD: 0 };
 
@@ -1575,6 +1591,9 @@ function render() {
       catTotals[h.type] += h.currentVal;
       catCosts[h.type] += h.totalCostUSD;
     }
+    const pct24 = change24hMap[h.symbol] !== undefined ? change24hMap[h.symbol] : 0;
+    todayChangeUSD += (h.currentVal * pct24) / 100;
+    if (!biggestHolding || h.currentVal > biggestHolding.currentVal) biggestHolding = h;
   });
 
   if (holdings.length === 0) {
@@ -1672,7 +1691,33 @@ function render() {
   badge.className = `pill ${isUnrealPos ? 'pos' : 'neg'}`;
   badge.innerText = `${isUnrealPos ? '+' : ''}${formatValue(unrealizedPnL)} (${isUnrealPos ? '+' : ''}${unrealizedPct.toFixed(2)}%)`;
 
+  const prevWorth = totalWorth - todayChangeUSD;
+  const todayPct = prevWorth > 0 ? (todayChangeUSD / prevWorth) * 100 : 0;
+  const isTodayPos = todayChangeUSD >= 0;
+  const todayBadge = document.getElementById('badgeToday');
+  todayBadge.className = `pill ${isTodayPos ? 'pos' : 'neg'}`;
+  todayBadge.innerText = `Hoy: ${isTodayPos ? '+' : ''}${formatValue(todayChangeUSD)} (${isTodayPos ? '+' : ''}${todayPct.toFixed(2)}%)`;
+
   document.getElementById('badgeTotalCost').innerText = `Invertido: ${formatValue(totalCost)}`;
+
+  const divBadge = document.getElementById('badgeDividends');
+  const monthDividends = computeCurrentMonthDividends();
+  if (monthDividends > 0.01) {
+    divBadge.style.display = 'inline-flex';
+    divBadge.innerText = `💰 Este mes: ${formatValue(monthDividends)}`;
+  } else {
+    divBadge.style.display = 'none';
+  }
+
+  const concEl = document.getElementById('metricConcentration');
+  if (concEl) {
+    if (biggestHolding && totalWorth > 0) {
+      const concPct = (biggestHolding.currentVal / totalWorth) * 100;
+      concEl.innerText = `${biggestHolding.symbol} · ${concPct.toFixed(1)}%`;
+    } else {
+      concEl.innerText = '—';
+    }
+  }
 
   document.getElementById('statCedears').innerText = formatValue(catTotals.CEDEAR);
   document.getElementById('statCrypto').innerText = formatValue(catTotals.CRYPTO);
