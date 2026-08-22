@@ -806,7 +806,7 @@ function renderCatalog() {
     row.innerHTML = `
       <span class="cat-row-ticker">${a.symbol}</span>
       <span class="cat-row-name">${a.name}</span>
-      ${a.type === 'CEDEAR' ? `<span class="badge-tag">1:${a.ratio}</span>` : ''}
+      ${a.type === 'CEDEAR' ? `<span class="badge-tag">1:${fmtRatio(a.ratio)}</span>` : ''}
       <span class="badge-broker cat-row-type" style="background:${s.bg}; color:${s.color};">${s.label}</span>
       <button class="cat-row-add" onclick="quickAddFromCatalog('${a.symbol}', '${a.type}')" title="Agregar a mi portafolio">+</button>
     `;
@@ -839,6 +839,13 @@ function setDisplayCurrency(curr) {
   document.getElementById('btnARS').className = `curr-btn ${curr === 'ARS' ? 'active' : ''}`;
   document.getElementById('btnBTC').className = `curr-btn ${curr === 'BTC' ? 'active' : ''}`;
   render();
+}
+
+function fmtRatio(r) {
+  const n = parseFloat(r);
+  if (isNaN(n)) return r;
+  if (Number.isInteger(n)) return String(n);
+  return String(parseFloat(n.toFixed(2)));
 }
 
 function formatValue(valUSD) {
@@ -968,7 +975,7 @@ function openParityModal(symbol) {
   document.getElementById('parityTitle').innerText = `${h.symbol} · Detalle de Paridad`;
   document.getElementById('paritySubtitle').innerText = h.companyName;
   document.getElementById('parityBody').innerHTML = `
-    <div class="parity-row"><span>Paridad</span><b>1 acción real = ${h.ratio} CEDEARs</b></div>
+    <div class="parity-row"><span>Paridad</span><b>1 acción real = ${fmtRatio(h.ratio)} CEDEARs</b></div>
     <div class="parity-row"><span>Tu tenencia</span><b>${h.units < 1 ? h.units.toFixed(6) : h.units.toFixed(2)} CEDEARs</b></div>
     <div class="parity-row"><span>Equivale a</span><b>${h.realShares.toFixed(4)} acciones reales</b></div>
     <div class="parity-row"><span>Precio del CEDEAR</span><b>${formatValue(pricePerCedear)}</b></div>
@@ -1215,7 +1222,7 @@ async function handleSearch() {
     div.style.padding = '10px 14px';
     div.style.cursor = 'pointer';
     div.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
-    div.innerHTML = `<b>${item.symbol}</b> <span style="color:#717d96">| ${item.name}${item.ratio > 1 ? ` (1:${item.ratio})` : ''}</span>`;
+    div.innerHTML = `<b>${item.symbol}</b> <span style="color:#717d96">| ${item.name}${item.ratio > 1 ? ` (1:${fmtRatio(item.ratio)})` : ''}</span>`;
     div.onclick = () => {
       document.getElementById('symbol').value = item.symbol;
       selectedAsset = item;
@@ -1739,7 +1746,7 @@ function render() {
       badgeInfo = `<span class="badge-tag" style="background:rgba(191,90,242,0.15); color:var(--purple)">Fondo / Renta</span>`;
       subDesc = `Invertido: ${formatValue(h.totalCostUSD)} · ${h.broker}`;
     } else {
-      const ratioTag = h.type === 'CEDEAR' ? `1:${h.ratio}` : '1:1';
+      const ratioTag = h.type === 'CEDEAR' ? `1:${fmtRatio(h.ratio)}` : '1:1';
       const ratioBadge = h.type === 'CEDEAR'
         ? `<span class="badge-tag badge-clickable" onclick="event.stopPropagation(); openParityModal('${h.symbol}')" title="Ver detalle de paridad">${ratioTag} ⓘ</span>`
         : `<span class="badge-tag">${ratioTag}</span>`;
